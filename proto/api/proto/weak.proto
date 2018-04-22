@@ -1,0 +1,155 @@
+/*
+ *  Copyright (c) 2016, https://github.com/wubenqi
+ *  All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+package zproto;
+
+option java_package = "com.zchat.engine.zproto";
+option java_outer_classname = "ZProtoWeak";
+option optimize_for = CODE_SIZE;
+
+import "peers.proto";
+
+// Typing and Online
+
+// TypingType
+enum TypingType {
+  kTypingType_Text = 0;
+}
+
+// Sending typing notification
+// TypingReq --> VoidRsp
+message TypingReq {
+  // int32 COMMAND_ID = 27;
+  OutPeer peer = 1; // Destination peer
+  TypingType typing_type = 3; // typing type.
+}
+
+// VoidRsp
+
+// Stop typing
+// StopTypingReq --> VoidRsp
+message StopTypingReq {
+  // int32 COMMAND_ID = 30;
+  OutPeer peer = 1; // Destination peer
+  TypingType typing_type = 2; // typing type
+}
+
+// VoidRsp
+
+// DeviceType
+enum DeviceType {
+  kDeviceType_GENERIC = 0;
+  kDeviceType_PC = 1;
+  kDeviceType_MOBILE = 2;
+  kDeviceType_TABLET = 3;
+  kDeviceType_WATCH = 4;
+  kDeviceType_MIRROR = 5;
+  kDeviceType_CAR = 6;
+  kDeviceType_TABLE = 7;
+}
+
+// Sending online state
+// SetOnlineReq --> VoidRsp
+message SetOnlineReq {
+  // int32 COMMAND_ID = 29;
+  bool is_online = 1; // is user online
+  int64 timeout = 2; // timeout of online state in milliseconds
+  DeviceType device_type = 3; // Optional device type
+  string device_category = 4; // Optional device category, for example android or ios
+}
+
+// VoidRsp
+
+// Update about pausing notifications
+message PauseNotificationsNotify {
+  // int32 COMMAND_ID = 166;
+  int32 timeout = 1; //   Timeout for notifications resume
+}
+
+// Update about restoring notifications
+message RestoreNotificationsNotify {
+  // int32 COMMAND_ID = 167;
+}
+
+// Pause notifications
+// PauseNotificationsReq --> VoidRsp
+message PauseNotificationsReq {
+  // int32 COMMAND_ID = 2641;
+  int32 timeout = 1; // Timeout of pause
+}
+
+// VoidRsp
+
+// Restoring notifications
+// RestoreNotificationsReq --> VoidRsp
+message RestoreNotificationsReq {
+  // int32 COMMAND_ID = 2642;
+}
+
+// VoidRsp
+
+// empty
+
+// Update about user's typing
+message TypingNotify {
+  // int32 COMMAND_ID = 6;
+  Peer peer = 1; //   Conversation peer
+  int32 uid = 2; //   User's id
+  TypingType typing_type = 3; //   Type of typing
+}
+
+// Update about user's typing stop
+message TypingStopNotify {
+  // int32 COMMAND_ID = 81;
+  Peer peer = 1; //   Conversation peer
+  int32 uid = 2; //   User's id
+  TypingType typing_type = 3; //   Type of typing
+}
+
+// Update about user became online
+message UserOnlineNotify {
+  // int32 COMMAND_ID = 7;
+  int32 uid = 1; //   User's Id
+  DeviceType device_type = 2;
+  string device_category = 3;
+}
+
+// Update about user became offline
+message UserOfflineNotify {
+  // int32 COMMAND_ID = 8;
+  int32 uid = 1; //   User's id
+  DeviceType device_type = 2;
+  string device_category = 3;
+}
+
+// Update about user's last seen state
+message UserLastSeenNotify {
+  // int32 COMMAND_ID = 9;
+  int32 uid = 1; //   User's id
+  int64 date = 2; //   Last seen time
+  DeviceType device_type = 3;
+  string device_category = 4;
+}
+
+// Update about group online change
+message GroupOnlineNotify {
+  // int32 COMMAND_ID = 33;
+  int32 group_id = 1; //   Group id
+  int32 count = 2; //   current online user's count
+}
+

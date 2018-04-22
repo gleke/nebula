@@ -1,0 +1,130 @@
+/*
+ *  Copyright (c) 2016, https://github.com/wubenqi
+ *  All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+package zproto;
+
+option java_package = "com.zchat.engine.zproto";
+option java_outer_classname = "ZProtoGroups";
+option optimize_for = CODE_SIZE;
+
+import "types.proto";
+import "files.proto";
+
+// Groups
+
+// Entities
+
+// Member information
+message Member {
+  string uid = 1; //   User id
+  string inviter_uid = 2; //   User inviter id
+  int64 date = 3; //   Adding date
+  bool is_admin = 4; //   is member admin of group
+}
+
+// GroupPermissions
+enum GroupPermissions {
+  SEND_MESSAGE = 0;
+  CLEAR = 1;
+  LEAVE = 2;
+  DELETE = 3;
+  JOIN = 4;
+  VIEW_INFO = 5;
+}
+
+// GroupFullPermissions
+enum GroupFullPermissions {
+  EDIT_INFO = 0;
+  VIEW_MEMBERS = 1;
+  INVITE_MEMBERS = 2;
+  INVITE_VIA_LINK = 3;
+  CALL = 4;
+  EDIT_ADMIN_SETTINGS = 5;
+  VIEW_ADMINS = 6;
+  EDIT_ADMINS = 7;
+  KICK_INVITED = 8;
+  KICK_ANYONE = 9;
+  EDIT_FOREIGN = 10;
+  DELETE_FOREIGN = 11;
+}
+
+// Group information
+// 
+// Permissions.
+// Permissions of this structure is about group messages operation, such as
+// ability to send messages, clear chat, leave group and so on. This operations
+// Can be held outside of the Group Info page.
+// 
+// Default value is ZERO, Opposide iz ONE. If Default is FALSE then ONE == TRUE.
+// If default is TRUE then ONE == FALSE.
+// Bits:
+// 0 - canSendMessage. Default is FALSE.
+// 1 - canClear. Default is FALSE.
+// 2 - canLeave. Default is FALSE.
+// 3 - canDelete. Default is FALSE.
+// 4 - canJoin. Default is FALSE.
+// 5 - canViewInfo. Default is FALSE.
+// 
+message Group {
+  string id = 1; //   group id
+  int64 access_hash = 2; //   Access hash of group
+  string title = 3; //   Title of group
+  Avatar avatar = 4; //   Avatar of group
+  int32 members_count = 5; //   Number of members
+  bool is_member = 6; //   Is current user a member of a group. Default is true.
+  bool is_hidden = 7; //   Is group hidden (not showing it in recent list). Default is false.
+  int64 permissions = 8; //   Permissions of group object
+  bool is_deleted = 9; //   Is this group deleted
+  map<string, RawArrayValue> ext = 10; //   Group extension Data
+}
+
+// Goup Full information
+// Permissions.
+// Idea of Group Full mermissions is about Group Info pages. This permissions
+// are usefull only when trying to view and update group settings and not related
+// to chat messages itself.
+// Default value is ZERO, Opposide iz ONE. If Default is FALSE then ONE == TRUE.
+// If default is TRUE then ONE == FALSE.
+// Bits:
+// 0 - canEditInfo. Default is FALSE.
+// 1 - canViewMembers. Default is FALSE.
+// 2 - canInviteMembers. Default is FALSE.
+// 3 - canInviteViaLink. Default is FALSE.
+// 4 - canCall. Default is FALSE.
+// 5 - canEditAdminSettings. Default is FALSE.
+// 6 - canViewAdmins. Default is FALSE.
+// 7 - canEditAdmins. Default is FALSE.
+// 8 - canKickInvited. Default is FALSE.
+// 9 - canKickAnyone. Default is FALSE.
+// 10 - canEditForeign. Default is FALSE.
+// 11 - canDeleteForeign. Default is FALSE.
+// 
+message GroupFull {
+  string id = 1; //   Group Id
+  int64 create_date = 2; //   Date created
+  string owner_uid = 3; //   Optional group owner
+  repeated Member members = 4; //   Group members. Can be empty when isAsyncMembers enabled.
+  string theme = 5; //   Group Theme
+  string about = 6; //   Group about
+  map<string, RawArrayValue> ext = 7;
+  bool is_async_members = 8; //   Is Members need to be loaded asynchronous. Default is false.
+  bool is_shared_history = 9; //   Is history shared among all users. Default is false.
+  string short_name = 10; //   Group's short name
+  int64 permissions = 11; //   Group Permissions
+}
+

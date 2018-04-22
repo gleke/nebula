@@ -1,0 +1,73 @@
+/*
+ *  Copyright (c) 2016, https://github.com/wubenqi
+ *  All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+package zproto;
+
+option java_package = "com.zchat.engine.zproto";
+option java_outer_classname = "ZProtoCollections";
+option optimize_for = CODE_SIZE;
+
+// Collections
+
+// Flexible raw collections without structure
+enum DataType {
+  INT32    = 0;
+  INT64    = 1;
+  UINT32   = 2;
+  UINT64   = 3;
+  FLOAT    = 4;
+  DOUBLE   = 5;
+  BOOL     = 6;
+  DATE     = 7; // Fixed-precision, daily granularity.
+  DATETIME = 8;  // Fixed-precision, microsecond granularity.
+  
+  STRING   = 9;
+  BINARY   = 10;
+  
+  // Note: tag ID 12 left for NULL_TYPE, used in common/proto already.
+  ENUM     = 11;
+  
+  // A special metatype.
+  DATA_TYPE = 12;
+  
+  // Note: next available: 13
+}
+
+message RawValue {
+  // Defines a type of the value.
+  DataType type = 1;
+  // Which value is set is determined by the type. If the corresponding value is
+  // not set, the Constant is assumed to be NULL.
+  int32 int32_value = 2;
+  int64 int64_value = 3;
+  uint32 uint32_value = 4;
+  uint64 uint64_value = 5;
+  float float_value = 6;
+  double double_value = 7;
+  bool bool_value = 8;
+  int32 date_value = 9;
+  int64 datetime_value = 10;
+  bytes binary_value = 11;
+  string string_value = 12;
+  DataType data_type_value = 13;
+}
+
+// Array value
+message RawArrayValue {
+  repeated RawValue array = 1;
+}

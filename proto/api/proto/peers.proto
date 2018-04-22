@@ -1,0 +1,60 @@
+/*
+ *  Copyright (c) 2016, https://github.com/wubenqi
+ *  All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+package zproto;
+
+option java_package = "com.zchat.engine.zproto";
+option java_outer_classname = "ZProtoPeers";
+option optimize_for = CODE_SIZE;
+
+// Peers
+
+// Peer is an identificator of specific conversation.
+
+// PeerType
+enum PeerType {
+  PEER_TYPE_PRIVATE = 0;
+  PEER_TYPE_GROUP = 1;
+  PEER_TYPE_ENCRYPTED_PRIVATE = 2;
+}
+
+// Peer
+message Peer {
+  PeerType type = 1; //   Peer Type
+  string id = 2; //   Peer Id
+}
+
+// Out peer with access hash
+message OutPeer {
+  PeerType type = 1; //   Peer Type
+  string id = 2; //   Peer Id
+  int64 access_hash = 3; //   Peer access hash
+}
+
+// User's out peer
+message UserOutPeer {
+  string uid = 1; //   User's id
+  int64 access_hash = 2; //   User's access hash
+}
+
+// Group's out peer
+message GroupOutPeer {
+  string group_id = 1; //   Group's Id
+  int64 access_hash = 2; //   Group's access hash
+}
+

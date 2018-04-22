@@ -1,0 +1,78 @@
+/*
+ *  Copyright (c) 2016, https://github.com/wubenqi
+ *  All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+package zproto;
+
+option java_package = "com.zchat.engine.zproto";
+option java_outer_classname = "ZProtoMisc";
+option optimize_for = CODE_SIZE;
+
+// Miscellaneous
+
+// UpdateOptimization
+enum UpdateOptimization {
+  NONE = 0;
+  STRIP_ENTITIES = 1;
+  ENABLE_COMBINED = 2;
+  FASTER_MESSAGES = 3;
+  STRIP_COUNTERS = 4;
+  COMPACT_USERS = 5;
+  GROUPS_V2 = 6;
+}
+
+// Empty response
+message VoidRsp {
+  // int32 COMMAND_ID = 50;
+}
+
+// Sequence response. Methods that return this value must process response in particular order
+message SeqRsp {
+  // int32 COMMAND_ID = 72;
+  int64 seq = 1; //   Sequence number of response
+}
+
+// Sequence response with date. Methods that return this value must process response in particular order
+message SeqDateRsp {
+  // int32 COMMAND_ID = 102;
+  int64 seq = 1;   //   Sequence number of response
+  int64 date = 2;  //   Date of response
+}
+
+// Boolean response
+message BoolRsp {
+  // int32 COMMAND_ID = 209;
+  bool value = 1; //   Response value
+}
+
+// Configuration of system
+message Config {
+  int32 max_group_size = 1; //   Current maximum group size
+}
+
+// Extention
+message Extension {
+  int32 id = 1; //   Extension id
+  bytes data = 2; //   Extension data
+}
+
+// Update about config change
+message ConfigNotify {
+  // int32 COMMAND_ID = 42;
+  Config config = 1; //   new config
+}
+

@@ -1,0 +1,63 @@
+/*
+ *  Copyright (c) 2016, https://github.com/wubenqi
+ *  All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+package zproto;
+
+option java_package = "com.zchat.engine.zproto";
+option java_outer_classname = "ZProtoMessaging";
+option optimize_for = CODE_SIZE;
+
+import "peers.proto";
+import "group_base.proto";
+
+// 消息类型
+enum MessageType {
+  TEXT = 0;
+  AUDIO = 1;
+  VIDEO = 2;
+  // ......
+}
+
+// 消息
+message InstantMessage {
+  MessageType message_type = 1;
+  bytes message_data = 2;
+}
+
+// MessageState
+enum MessageState {
+  SENT = 0;
+  RECEIVED = 1;
+  READ = 2;
+}
+
+// Message from history
+message MessageContainer {
+  string sender_uid = 1; //   Sender of mesasge
+  int64 rid = 2; //   Random Id of message
+  int64 date = 3; //   Date of message
+  InstantMessage message = 5; //   Content of message
+  MessageState state = 6;
+}
+
+// ListLoadMode
+enum ListLoadMode {
+  FORWARD = 0;
+  BACKWARD = 1;
+  BOTH = 2;
+}

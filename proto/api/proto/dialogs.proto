@@ -1,0 +1,176 @@
+/*
+ *  Copyright (c) 2016, https://github.com/wubenqi
+ *  All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+package zproto;
+
+option java_package = "com.zchat.engine.zproto";
+option java_outer_classname = "ZProtoMessaging";
+option optimize_for = CODE_SIZE;
+
+import "messaging_base.proto";
+import "group_base.proto";
+import "peers.proto";
+import "users.proto";
+
+// 会话详细信息
+message Dialog {
+  Peer peer = 1;                      // Peer of conversation
+  int32 unread_count = 2;             // 未读消息数
+  int64 sort_date = 3;                // 会话排序时间
+  MessageContainer last_message = 4;  // 最后一条消息
+  int64 first_unread_date = 5;        // 第一条未读消息时间
+}
+
+// 加载会话列表
+// LoadDialogsReq --> LoadDialogsRsp
+message LoadDialogsReq {
+  // int32 COMMAND_ID = 104;
+  int64 min_date = 1;   // start date of conversation loading. Use 0 to load latest messages
+  ListLoadMode load_mode = 2;
+  int32 limit = 3;      // limit maximum amount of messages (max is 100)
+}
+
+// Loaded dialogs
+message LoadDialogsRsp {
+  // int32 COMMAND_ID = 105;
+  repeated Group groups = 1; //   Loaded groups
+  repeated User users = 2; //   Loaded users
+  repeated Dialog dialogs = 3; //   Loaded dialogs
+  repeated UserOutPeer user_peers = 4;
+  repeated GroupOutPeer group_peers = 5;
+}
+
+// 创建会话
+// 测试程序用，客户端不需要实现此请求
+// CreateDialogReq --> CreateDialogRsp
+message CreateChatDialogReq {
+  string peer_id = 1;
+}
+
+message CreateChatDialogRsp {
+  OutPeer peer = 1;
+}
+
+// SeqRsp
+
+// 阻止会话
+// BlockPeerReq --> SeqRsp
+message BlockPeerReq {
+  OutPeer peer = 1;
+}
+
+// SeqRsp
+
+// 取消阻止
+// UnBlockPeerReq --> SeqRsp
+message UnblockPeerReq {
+  OutPeer peer = 1;
+}
+
+// SeqRsp
+
+// 置顶会话
+// TopPeerReq --> SeqRsp
+message TopPeerReq {
+  OutPeer peer = 1;
+}
+
+// SeqRsp
+
+// 取消置顶
+// UnTopPeerReq --> SeqRsp
+message UntopPeerReq {
+  OutPeer peer = 1;
+}
+
+// SeqRsp
+
+// 免打扰
+// DndPeerReq --> SeqRsp
+message DndPeerReq {
+  OutPeer peer = 1;
+}
+
+// SeqRsp
+
+// 取消免打扰
+// UnDndPeerReq --> SeqRsp
+message UndndPeerReq {
+  OutPeer peer = 1;
+}
+
+// SeqRsp
+
+// Load Blocked Peers
+// LoadBlockedPeersReq --> LoadBlockedPeersRsp
+message LoadBlockedPeersReq {
+  // int32 COMMAND_ID = 2638;
+}
+
+message LoadBlockedPeersRsp {
+  // int32 COMMAND_ID = 2639;
+  repeated OutPeer peers = 1; //   Blocked peers
+}
+
+// Load Toped Peers
+// LoadTopedPeersReq --> LoadTopedPeersRsp
+message LoadTopedPeersReq {
+  // int32 COMMAND_ID = 2640;
+}
+
+message LoadTopedPeersRsp {
+  // int32 COMMAND_ID = 2641;
+  repeated OutPeer peers = 1; //   Toped peers
+}
+
+// Load Dnded Peers
+// LoadDndedPeersReq --> LoadDndedPeersRsp
+message LoadDndedPeersReq {
+  // int32 COMMAND_ID = 2640;
+}
+
+message LoadDndedPeersRsp {
+  // int32 COMMAND_ID = 2641;
+  repeated OutPeer peers = 1; //   Dnded peers
+}
+
+// Update about Peer Blocked
+message PeerBlockedNotify {
+  Peer peer = 1;  //
+}
+
+message PeerUnblockedNotify {
+  Peer peer = 1;
+}
+
+message PeerTopedNotify {
+  Peer peer = 1;  //
+}
+
+message PeerUntopedNotify {
+  Peer peer = 1;
+}
+
+message PeerDndedNotify {
+  Peer peer = 1;  //
+}
+
+message PeerUndndedNotify {
+  Peer peer = 1;
+}
+

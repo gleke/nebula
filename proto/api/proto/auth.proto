@@ -1,0 +1,82 @@
+/*
+ *  Copyright (c) 2016, https://github.com/nebula-im
+ *  All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+package zproto;
+
+option java_package = "com.zchat.engine.zproto";
+option java_outer_classname = "ZProtoAuth";
+option optimize_for = CODE_SIZE;
+
+import "misc.proto";
+import "users.proto";
+
+// Authentication
+
+// Starting token-based login
+// StartTokenAuthReq --> AuthRsp
+message StartTokenAuthReq {
+  // int32 COMMAND_ID = 203;
+  string token = 1; // Token for authentication
+  uint32 app_id = 2; // Application Id
+  string api_key = 3; // Application API key
+  bytes device_hash = 4; // Hash of device unique id and app bundle id. Used for autologout users when app is reinstalled
+  string device_title = 5; // Device Title
+  string time_zone = 6; // TimeZone of device
+  repeated string preferred_languages = 7; // Preferred languages
+}
+
+// Starting token-based login
+// StartTestingAuthReq --> AuthRsp
+message StartTestingAuthReq {
+  // int32 COMMAND_ID = 203;
+  uint32 app_id = 1; // Application Id
+  string user_id = 2; // User id
+  bytes device_hash = 4; // Hash of device unique id and app bundle id. Used for autologout users when app is reinstalled
+  string device_title = 5; // Device Title
+  string time_zone = 6; // TimeZone of device
+  repeated string preferred_languages = 7; // Preferred languages
+}
+
+// AuthRsp
+
+// Authentication result
+message AuthRsp {
+  // int32 COMMAND_ID = 5;
+  User user = 2; //   The authenticated User
+  Config config = 3; //   Current config of server
+}
+
+/**
+  message UserTokenAuthReq {
+    string app_key = 1;
+    string user_id = 2;
+    string user_token = 3;
+    
+    // uint64 client_time = 4;
+  }
+
+  // 服务器和客户端对时
+  message UserTokenAuthRsp {
+    // uint64 client_time = 1;
+    // uint64 server_time = 2;
+    uint32 app_id = 1;
+    string user_id = 2;
+    string nick = 3;
+    string avatar = 4;
+  }
+ */

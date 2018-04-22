@@ -1,0 +1,46 @@
+/*
+ *  Copyright (c) 2016, https://github.com/wubenqi
+ *  All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+package zproto;
+
+option java_package = "com.zchat.engine.zproto";
+option java_outer_classname = "ZProtoFiles";
+option optimize_for = CODE_SIZE;
+
+// Media and Files
+
+// Location of file on server
+message FileLocation {
+  int64 file_id = 1; //   Unique Id of file
+  int64 access_hash = 2; //   Access hash of file
+}
+
+// Avatar Image
+message AvatarImage {
+  FileLocation file_location = 1; //   Location of file
+  int32 width = 2; //   Width of avatar image
+  int32 height = 3; //   Height of avatar image
+  int32 file_size = 4; //   Size of file
+}
+
+// Avatar of User or Group
+message Avatar {
+  AvatarImage small_image = 1; //   Optional small image of avatar box in 100x100
+  AvatarImage large_image = 2; //   Optional large image of avatar box in 200x200
+  AvatarImage full_image = 3; //   Optional full screen image of avatar
+}

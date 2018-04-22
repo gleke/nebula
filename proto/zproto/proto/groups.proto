@@ -1,0 +1,130 @@
+/*
+ *  Copyright (c) 2016, https://github.com/nebula-im
+ *  All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package zproto;
+
+option java_package = "com.zchat.engine.zproto";
+option java_outer_classname = "ZProto";
+option optimize_for = CODE_SIZE;
+
+// 群成员
+message GroupMember {
+  string user_id = 1;     // 用户ID
+  string inviter_uid = 2; // 邀请者
+  int64  date = 3;        // 加入群时间
+  bool is_admin = 4;      // 是否群管理员
+}
+
+// 群成员
+message Group {
+  string group_id = 1;              // 群ID
+  string title = 2;                 // 群标题
+  string avatar = 3;                 // 群标题
+  repeated GroupMember members = 4; // 群成员
+}
+
+// 创建群请求
+// CreateGroupReq --> CreateGroupRsp
+message CreateGroupReq {
+  string creator_user_id = 1;
+  int64 client_group_id = 2;    // 客户端创建的随机ID，去重
+  string title = 3;             // 群标题
+  repeated string user_ids = 4; // 成员
+}
+
+// 创建群响应
+message CreateGroupRsp {
+  uint64 seq = 1;                 // 序号
+  uint64 created = 2;             // 创建时间
+  Group group = 3;                // 群信息
+  repeated string user_ids = 4;   // 群成员
+}
+
+// 加载群成员
+// LoadMembersReq --> LoadMembersRsp
+message LoadMembersReq {
+  string group_id = 1;  //
+  // TODO(@benqi): 先不考虑超大群，每次请求拉取全部群成员
+  // int32 limit = 2;      // Limit members
+  // int32 offset = 3;     //
+}
+
+// LoadMembersRsp
+message LoadMembersRsp {
+  repeated GroupMember members = 1;
+}
+
+// 加载群信息
+// LoadFullGroupsReq --> LoadFullGroupsRsp
+message LoadFullGroupsReq {
+  repeated string groups = 1; // Groups to load
+}
+
+// LoadFullGroupsRsp
+message LoadFullGroupsRsp {
+  repeated Group groups = 1; //   Groups to load
+}
+
+// 邀请用户加群
+// InviteUserReq --> SeqDateRsp
+message InviteUserReq {
+  string group_id = 1;  // Group's peer
+  int64 rid = 4;        // Random Id of operation
+  string invited_user_id = 3; // Users for invitation
+}
+
+// SeqDateRsp
+
+// 退群
+// LeaveGroupReq --> SeqDateRsp
+message LeaveGroupReq {
+  // int32 COMMAND_ID = 70;
+  string group_id = 1; // Group's peer
+  int64 rid = 2; // Random Id of operation
+}
+
+// SeqDateRsp
+
+// 退群并清空聊天记录
+// LeaveAndDeleteReq --> SeqRsp
+message LeaveAndDeleteReq {
+  // int32 COMMAND_ID = 2721;
+  string group_id = 1; // Group peer
+}
+
+// SeqRsp
+
+// 踢出群
+// KickUserReq --> SeqDateRsp
+message KickUserReq {
+  // int32 COMMAND_ID = 71;
+  string group_id = 1; // Group's peer
+  int64 rid = 4; // Random Id of operation
+  string user_id = 3; // users for removing
+}
+
+// SeqDateRsp
+
+// 同意进群
+// JoinGroupByPeerReq --> SeqRsp
+message JoinGroupByPeerReq {
+  string group_id = 1; // Group's peer
+}
+
+// SeqRsp

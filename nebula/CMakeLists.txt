@@ -1,0 +1,7 @@
+add_subdirectory(base)
+#add_subdirectory(storage)
+add_subdirectory(net)
+#add_subdirectory(mysql_client)
+#add_subdirectory(redis_client)
+#add_subdirectory(zorm)
+#add_subdirectory(scriptengine)

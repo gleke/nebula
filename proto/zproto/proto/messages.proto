@@ -1,0 +1,121 @@
+/*
+ *  Copyright (c) 2016, https://github.com/nebula-im
+ *  All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package zproto;
+
+option java_package = "com.zchat.engine.zproto";
+option java_outer_classname = "ZProto";
+option optimize_for = CODE_SIZE;
+
+import "bases.proto";
+import "peers.proto";
+
+message VoidRsp {
+}
+
+// 发聊天消息
+// SendMessageReq --> SeqDateRsp
+// SEND_MESSAGE_REQ = 0xff09;
+message SendMessageReq {
+  MessageContainer message_data = 1;
+}
+
+// 发送聊天消息响应
+// SEND_MESSAGE_RSP = 0xff0a;
+message SeqDateRsp {
+  uint64 seq  = 1;      // Sequence number of response
+  uint64 created  = 2;  // Date of response
+}
+
+// 转发给PushServer
+// ForwardMessageReq --> VoidRsp
+message ForwardMessageReq {
+  MessageContainer message_data = 1;
+  repeated uint64 not_send_conn_ids = 2;
+  uint64 my_conn_id = 3;
+}
+
+// 通知客户端有消息到达
+// MessageNotify --> MessageAck
+message MessageNotify {
+}
+
+// 通知客户端有消息到达
+// MessageDataNotify --> 客户端会回Ack
+message MessageDataNotify {
+  MessageContainer message_data = 1;
+}
+
+// 请求同步消息
+message MessageSyncReq {
+  uint64 received_max_seq = 1;  //
+}
+
+// 通知客户端有消息到达
+// 可以带多条消息
+message MessageSyncRsp {
+  repeated MessageContainer message_data = 1;
+}
+
+// 消息已读
+// MessageReadReq --> VoidRsp
+message MessageReadReq {
+  Peer peer = 1;         // Destination peer
+  uint64  read_max_seq = 2; // Maximum date of read messages
+}
+
+// Loading history of chat
+// LoadHistoryReq --> LoadHistoryRsp
+message LoadHistoryMessageReq {
+  // int32 COMMAND_ID = 118;
+  Peer peer = 1; // Peer of conversation
+  uint32  date = 2; // start date of messages for loading or 0 for loading from start
+  EnumHelper.ListLoadMode load_mode = 3; // Loading mode: Forward loading, backward or both ways
+  uint32 limit = 4; // maximum amount of messages (max is 100)
+}
+
+// Loaded history
+message LoadHistoryMessageRsp {
+  repeated MessageContainer history = 1; //   Messages
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// 会话列表协议设计说明（会话驱动）:
+//  正常使用不需要用到这几条协议，因为nebula-im的一个设计原则是消息驱动，
+//  但为了支持任何终端任何时候的历史漫游，也还需要支持会话驱动。
+//
+//
+// 已有账号换了个手机，第一次进入时要拉取所有会话信息,分成如下几个步骤:
+// 1. 拉首屏, 按时间降序, date为uint64最大值
+// 2. 如果有必要, 拉取全部会话, 此时远到近拉, 第一次date为0,
+//    以后按从小到大的, 一旦ConversationID碰撞,则认为全部接收完毕
+//
+// 拉取会话列表
+// LoadDialogsReq --> LoadDialogsRsp
+message LoadDialogsReq {
+  uint64  date = 1;                       //
+  EnumHelper.ListLoadMode load_mode = 2;  // Loading mode: Forward loading, backward or both ways
+  uint32 limit = 3;                       // 最大会话数(不超过100)
+}
+
+// Loaded dialogs
+message LoadDialogsRsp {
+  repeated Dialog dialogs = 1; //   Loaded dialogs
+}
+

@@ -1,0 +1,440 @@
+/*
+ *  Copyright (c) 2016, https://github.com/wubenqi
+ *  All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+package zproto;
+
+option java_package = "com.zchat.engine.zproto";
+option java_outer_classname = "ZProtoGroups";
+option optimize_for = CODE_SIZE;
+
+import "misc.proto";
+import "peers.proto";
+import "files.proto";
+import "users.proto";
+import "group_base.proto";
+
+// Loading Full Groups
+// LoadFullGroupsReq --> LoadFullGroupsRsp
+message LoadFullGroupsReq {
+  // int32 COMMAND_ID = 2782;
+  repeated GroupOutPeer groups = 1; // Groups to load
+}
+
+message LoadFullGroupsRsp {
+  // int32 COMMAND_ID = 2783;
+  repeated GroupFull groups = 1; //   Groups to load
+}
+
+// Loading group members
+// LoadMembersReq --> LoadMembersRsp
+message LoadMembersReq {
+  // int32 COMMAND_ID = 2786;
+  GroupOutPeer group = 1; // Group peer
+  int32 limit = 2; // Limit members
+  bytes next = 3; // Load more reference
+}
+
+message LoadMembersRsp {
+  // int32 COMMAND_ID = 2787;
+  repeated Member members = 1;
+  repeated UserOutPeer users = 2; //   Group members
+  bytes next = 3; //   Load more reference
+}
+
+// Update
+
+// Update about title changed
+message GroupTitleChangedNotify {
+  // int32 COMMAND_ID = 2609;
+  string group_id = 1; //   Group Id
+  string title = 2; //   Group Title
+}
+
+// Update about avatar changed
+message GroupAvatarChangedNotify {
+  // int32 COMMAND_ID = 2610;
+  string group_id = 1; //   Group Id
+  Avatar avatar = 2; //   Group Avatar
+}
+
+// Update about topic changed
+message GroupTopicChangedNotify {
+  // int32 COMMAND_ID = 2616;
+  string group_id = 1; //   Group Id
+  string topic = 2; //   Updated topic
+}
+
+// Update about about changed
+message GroupAboutChangedNotify {
+  // int32 COMMAND_ID = 2617;
+  string group_id = 1; //   Group Id
+  string about = 2; //   Updated about
+}
+
+// Update about owner changed
+message GroupOwnerChangedNotify {
+  // int32 COMMAND_ID = 2619;
+  string group_id = 1; //   Group Id
+  string user_id = 2; //   New Owner
+}
+
+// Update about group deleted
+message GroupDeletedNotify {
+  // int32 COMMAND_ID = 2658;
+  string group_id = 1; //   Group Id
+}
+
+// Update about group permissions changed
+message GroupPermissionsChangedNotify {
+  // int32 COMMAND_ID = 2663;
+  string group_id = 1; //   Group Id
+  int64 permissions = 2; //   New Permissions
+}
+
+// Update about Full Group permissions changed
+message GroupFullPermissionsChangedNotify {
+  // int32 COMMAND_ID = 2664;
+  string group_id = 1; //   Group Id
+  int64 permissions = 2; //   New Permissions
+}
+
+//  
+
+// Update about membership changed
+message GroupMemberChangedNotify {
+  // int32 COMMAND_ID = 2612;
+  string group_id = 1; //   Group Id
+  bool is_member = 2; //   Is current user a member
+}
+
+// Update about members became async
+message GroupMembersBecameAsyncNotify {
+  // int32 COMMAND_ID = 2615;
+  string group_id = 1; //   Group Id
+}
+
+// Update about members updated
+message GroupMembersUpdatedNotify {
+  // int32 COMMAND_ID = 2614;
+  string group_id = 1; //   Group Id
+  repeated Member members = 2; //   Group Members
+}
+
+// Update about members changed
+message GroupMemberDiffNotify {
+  // int32 COMMAND_ID = 2623;
+  string group_id = 1;
+  repeated int32 removed_users = 2; //   Removed Users
+  repeated Member added_members = 3; //   Added members
+  int32 members_count = 4; //   Current Members count
+}
+
+// Update about members count changed
+message GroupMembersCountChangedNotify {
+  // int32 COMMAND_ID = 2622;
+  string group_id = 1; //   Group Id
+  int32 members_count = 2; //   Members count
+}
+
+// Update about member admin changed
+message GroupMemberAdminChangedNotify {
+  // int32 COMMAND_ID = 2627;
+  string group_id = 1; //   Group Id
+  string user_id = 2; //   User Id
+  bool is_admin = 3; //   Is Admin flag
+}
+
+// Actions
+
+// Creating group chat
+// CreateGroupReq --> CreateGroupRsp
+message CreateGroupReq {
+  // int32 COMMAND_ID = 230;
+  int64 rid = 1; // Random Id for avoiding double create
+  string title = 2; // Group Title
+  repeated UserOutPeer users = 3; // Members of group
+  repeated UpdateOptimization optimizations = 4; // Enabled Optimizations
+}
+
+// Created group
+message CreateGroupRsp {
+  // int32 COMMAND_ID = 216;
+  int32 seq = 1; //   Update Seq
+  // bytes state = 2; //   Update state
+  int64 date = 6; //   Group creation date
+  Group group = 3; //   Created group
+  repeated User users = 4; //   Referenced users
+  repeated UserOutPeer user_peers = 5; //   Referenced users
+}
+
+// Changing group title
+// EditGroupTitleReq --> SeqDateRsp
+message EditGroupTitleReq {
+  // int32 COMMAND_ID = 85;
+  GroupOutPeer group_peer = 1; // Group's peer
+  int64 rid = 4; // Random Id of operation
+  string title = 3; // new group title
+  repeated UpdateOptimization optimizations = 5; // Enabled Optimizations
+}
+
+// SeqDateRsp
+
+// Changing group avatar
+// EditGroupAvatarReq --> EditGroupAvatarRsp
+message EditGroupAvatarReq {
+  // int32 COMMAND_ID = 86;
+  GroupOutPeer group_peer = 1; // Group's peer
+  string rid = 4; // Random Id of operation
+  FileLocation file_location = 3; // uploaded file for avatar
+  repeated UpdateOptimization optimizations = 5; // Enabled Optimizations
+}
+
+// Updated group avatar
+message EditGroupAvatarRsp {
+  // int32 COMMAND_ID = 115;
+  Avatar avatar = 1; //   Changed avatar
+  int32 seq = 2; //   Sequence number
+  bytes state = 3; //   Sequence state
+  int64 date = 4; //   Avatar change date
+}
+
+// Removing group avatar
+// RemoveGroupAvatarReq --> SeqDateRsp
+message RemoveGroupAvatarReq {
+  // int32 COMMAND_ID = 101;
+  GroupOutPeer group_peer = 1; // Group's peer
+  int64 rid = 4; // Random Id of operation
+  repeated UpdateOptimization optimizations = 5; // Enabled Optimizations
+}
+
+// SeqDateRsp
+
+// Edit Group Short Name
+// EditGroupShortNameReq --> SeqRsp
+message EditGroupShortNameReq {
+  // int32 COMMAND_ID = 2793;
+  GroupOutPeer group_peer = 1; // Group's peer
+  string short_name = 2; // New group's short name
+}
+
+// SeqRsp
+
+// Edit group topic
+// EditGroupTopicReq --> SeqDateRsp
+message EditGroupTopicReq {
+  // int32 COMMAND_ID = 211;
+  GroupOutPeer group_peer = 1; // Group's peer
+  int64 rid = 2; // Random id of operation
+  string topic = 3; // New Topic
+  repeated UpdateOptimization optimizations = 4; // Enabled Optimizations
+}
+
+// SeqDateRsp
+
+// Edit Group About
+// EditGroupAboutReq --> SeqDateRsp
+message EditGroupAboutReq {
+  // int32 COMMAND_ID = 213;
+  GroupOutPeer group_peer = 1; // Group's peer
+  int64 rid = 2; // Random id of operation
+  string about = 3; // New About
+  repeated UpdateOptimization optimizations = 5; // Enabled Optimizations
+}
+
+// SeqDateRsp
+
+// Inviting user to group
+// InviteUserReq --> SeqDateRsp
+message InviteUserReq {
+  // int32 COMMAND_ID = 69;
+  GroupOutPeer group_peer = 1; // Group's peer
+  int64 rid = 4; // Random Id of operation
+  UserOutPeer user = 3; // Users for invitation
+  repeated UpdateOptimization optimizations = 5; // Enabled Optimizations
+}
+
+// SeqDateRsp
+
+// Leaving group
+// LeaveGroupReq --> SeqDateRsp
+message LeaveGroupReq {
+  // int32 COMMAND_ID = 70;
+  GroupOutPeer group_peer = 1; // Group's peer
+  int64 rid = 2; // Random Id of operation
+  repeated UpdateOptimization optimizations = 3; // Enabled Optimizations
+}
+
+// SeqDateRsp
+
+// Leave group and Delete Chat
+// LeaveAndDeleteReq --> SeqRsp
+message LeaveAndDeleteReq {
+  // int32 COMMAND_ID = 2721;
+  GroupOutPeer group_peer = 1; // Group peer
+}
+
+// SeqRsp
+
+// Kicking user from group
+// KickUserReq --> SeqDateRsp
+message KickUserReq {
+  // int32 COMMAND_ID = 71;
+  GroupOutPeer group_peer = 1; // Group's peer
+  int64 rid = 4; // Random Id of operation
+  UserOutPeer user = 3; // users for removing
+  repeated UpdateOptimization optimizations = 5; // Enabled Optimizations
+}
+
+// SeqDateRsp
+
+// Join group by peer
+// JoinGroupByPeerReq --> SeqRsp
+message JoinGroupByPeerReq {
+  // int32 COMMAND_ID = 2722;
+  GroupOutPeer group_peer = 1; // Group's peer
+}
+
+// SeqRsp
+
+// Administration
+
+// Make user admin
+// MakeUserAdminReq --> SeqDateRsp
+message MakeUserAdminReq {
+  // int32 COMMAND_ID = 2784;
+  GroupOutPeer group_peer = 1; // Group's peer
+  UserOutPeer user_peer = 2; // User's peer
+}
+
+// SeqDateRsp
+
+// Dismissing user admin
+// DismissUserAdminReq --> SeqRsp
+message DismissUserAdminReq {
+  // int32 COMMAND_ID = 2791;
+  GroupOutPeer group_peer = 1; // Group's peer
+  UserOutPeer user_peer = 2; // User's peer
+}
+
+// SeqRsp
+
+// Transfer ownership of group
+// TransferOwnershipReq --> SeqDateRsp
+message TransferOwnershipReq {
+  // int32 COMMAND_ID = 2789;
+  GroupOutPeer group_peer = 1; // Group's peer
+  UserOutPeer new_owner = 2; // New group's owner
+}
+
+// SeqDateRsp
+
+// Admin Settings
+message AdminSettings {
+  bool show_admins_to_members = 1; //   Show admins in member list
+  bool can_members_invite = 2; //   Can members of a group invite people
+  bool can_members_edit_group_info = 3; //   Can members edit group info
+  bool can_admins_edit_group_info = 4; //   Can admins edit group info
+  bool show_join_leave_messages = 5; //   Should join and leave messages be visible to members
+}
+
+// Loading administration settings
+// LoadAdminSettingsReq --> LoadAdminSettingsRsp
+message LoadAdminSettingsReq {
+  // int32 COMMAND_ID = 2790;
+  GroupOutPeer group_peer = 1; // Group's peer
+}
+
+// Loaded settings
+message LoadAdminSettingsRsp {
+  // int32 COMMAND_ID = 2794;
+  AdminSettings settings = 1; //   Current group admin settings
+}
+
+// Save administartion settings
+// SaveAdminSettingsReq --> VoidRsp
+message SaveAdminSettingsReq {
+  // int32 COMMAND_ID = 2792;
+  GroupOutPeer group_peer = 1; // Group's Peer
+  AdminSettings settings = 2; // Group's settings
+}
+
+// VoidRsp
+
+// Delete Group
+// DeleteGroupReq --> SeqRsp
+message DeleteGroupReq {
+  // int32 COMMAND_ID = 2795;
+  GroupOutPeer group_peer = 1; // Group's peer
+}
+
+// SeqRsp
+
+// Share History
+// ShareHistoryReq --> SeqRsp
+message ShareHistoryReq {
+  // int32 COMMAND_ID = 2796;
+  GroupOutPeer group_peer = 1; // Group's peer
+}
+
+// SeqRsp
+
+// Invite
+
+// Response for invite url methods
+message InviteUrlRsp {
+  // int32 COMMAND_ID = 178;
+  string url = 1;
+}
+
+// Building invite url
+// GetGroupInviteUrlReq --> InviteUrlRsp
+message GetGroupInviteUrlReq {
+  // int32 COMMAND_ID = 177;
+  GroupOutPeer group_peer = 1; // Destination group peer
+}
+
+// InviteUrlRsp
+
+// Revoking invite urls
+// RevokeInviteUrlReq --> InviteUrlRsp
+message RevokeInviteUrlReq {
+  // int32 COMMAND_ID = 179;
+  GroupOutPeer group_peer = 1; // Destination group peer
+}
+
+// InviteUrlRsp
+
+// Join group method
+// JoinGroupReq --> JoinGroupRsp
+message JoinGroupReq {
+  // int32 COMMAND_ID = 180;
+  string token = 1; // Url or Token for joining to group
+  repeated UpdateOptimization optimizations = 2; // Enabled Optimizations
+}
+
+message JoinGroupRsp {
+  // int32 COMMAND_ID = 181;
+  Group group = 1; //   Joined group
+  repeated User users = 5; //   Users from members
+  repeated UserOutPeer user_peers = 7; //   User Peers
+  int64 rid = 6; //   Random id
+  int32 seq = 2; //   Sequence number
+  bytes state = 3; //   State
+  int64 date = 4; //   Date of join
+}
+

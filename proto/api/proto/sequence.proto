@@ -1,0 +1,197 @@
+/*
+ *  Copyright (c) 2016, https://github.com/wubenqi
+ *  All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+package zproto;
+
+option java_package = "com.zchat.engine.zproto";
+option java_outer_classname = "ZProtoSequence";
+option optimize_for = CODE_SIZE;
+
+import "misc.proto";
+import "peers.proto";
+import "users.proto";
+import "group_base.proto";
+import "messaging_base.proto";
+
+// Sequence and Updates
+
+// Each device has it's own update sequence. At the begining application request initial sequence state by
+// calling GetState. On each application restart or NewSessionCreated application calls GetDifference for receiving
+// updates in update sequence.
+// GetState and GetDifference automatically subscribes session to receiving updates in session.
+// Each update has seq and state. Seq is sequental index of updated and used for detecting of holes in update sequence
+// (because of server failure or session die) on client side.
+// All updates needed to be processed in partucular order according to seq values.
+// In some updates there can be references to users that are not available at client yer. In this case application need
+// to ignore such update and init getting difference.
+
+
+// Sequence update
+message SeqUpdate {
+  // int32 COMMAND_ID = 13;
+  int64 seq = 1; //   Sequence number of update
+  // bytes state = 2; //   Sequece state of update
+  int32 update_header = 2; //   header of update
+  bytes update = 3; //   The update
+}
+
+// Fat sequence update with additional data
+message FatSeqUpdate {
+  // int32 COMMAND_ID = 73;
+  int32 seq = 1; //   Sequence number of update
+  // bytes state = 2; //   Sequence state of update
+  int32 update_header = 3; //   header of update
+  bytes update = 4; //   The update
+  repeated User users = 5; //   Users that are referenced in update
+  repeated Group groups = 6; //   Groups that are referenced in update
+}
+
+// Out of sequence update (for typing and online statuses)
+message WeakUpdate {
+  // int32 COMMAND_ID = 26;
+  int64 date = 1; //   Date of update
+  int32 update_header = 2; //   Header of update
+  bytes update = 3; //   The update
+}
+
+// Fat Weak Update
+message WeakFatUpdate {
+  // int32 COMMAND_ID = 2673;
+  int64 date = 1; //   Date of update
+  int32 update_header = 2; //   Header of update
+  bytes update = 3; //   The update
+  repeated User users = 4; //   Users that are referenced in update
+  repeated Group groups = 5; //   Groups that are referenced in update
+}
+
+// Notification about requiring performing manual GetDifference
+message SeqUpdateTooLong {
+  // int32 COMMAND_ID = 25;
+}
+
+message UpdateContainer {
+  int32 update_header = 1; //   Header of update
+  bytes update = 2; //   The updatre
+}
+
+// Combined update
+message CombinedUpdate {
+  int64 seq_start = 1; //   Sequence number start
+  int64 seq_end = 2; //   Sequence number end
+  // bytes state = 3; //   Sequence state
+  repeated User users = 4; //   Update's users
+  repeated Group groups = 5; //   Update's groups
+  repeated UpdateContainer updates = 6; //   Updates (can be empty)
+  repeated MessageContainer messages = 7; //   New messages
+}
+
+// Get main sequence state
+// GetStateReq --> SeqRsp
+message GetStateReq {
+  // int32 COMMAND_ID = 9;
+  repeated UpdateOptimization optimizations = 1; // Enabled optimizations
+}
+
+// SeqRsp
+
+// Getting difference of sequence
+// GetDifferenceReq --> GetDifferenceRsp
+message GetDifferenceReq {
+  // int32 COMMAND_ID = 11;
+  int64 seq = 1; // Sequence number
+  // bytes state = 2; // Sequence state
+  repeated UpdateOptimization optimizations = 3; // Enabled optimizations
+}
+
+message GetDifferenceRsp {
+  // int32 COMMAND_ID = 12;
+  int64 seq = 1; //   Seq of LAST update in updates
+  // bytes state = 2; //   State of LAST update in updates
+  repeated User users = 3; //   Users referenced in updates
+  repeated Group groups = 4; //   Groups referenced in updates
+  repeated UpdateContainer updates = 5; //   Updates
+  repeated MessageContainer messages = 6;
+  bool need_more = 7; //   Need to perform other difference
+  repeated UserOutPeer users_refs = 8; //   Direct references of users
+  repeated GroupOutPeer groups_refs = 9; //   Direct References of groups
+}
+
+// Loading referenced entities
+// GetReferencedEntititesReq --> GetReferencedEntititesRsp
+message GetReferencedEntititesReq {
+  // int32 COMMAND_ID = 2628;
+  repeated UserOutPeer users = 1; // Users to load
+  repeated GroupOutPeer groups = 2; // Groups to load. Also returns all members of a group.
+}
+
+message GetReferencedEntititesRsp {
+  // int32 COMMAND_ID = 2629;
+  repeated User users = 1; //   Loaded users
+  repeated Group groups = 2; //   Loaded groups
+}
+
+// Custom Raw Update
+message RawUpdateNotify {
+  // int32 COMMAND_ID = 80;
+  string type = 1; //   Type of content
+  bytes bytes = 2; //   Raw data
+}
+
+// Empty update
+message EmptyUpdateNotify {
+  // int32 COMMAND_ID = 85;
+}
+
+// empty
+
+// Subscribing for users online
+// SubscribeToOnlineReq --> VoidRsp
+message SubscribeToOnlineReq {
+  // int32 COMMAND_ID = 32;
+  repeated UserOutPeer users = 1; // Users for subscription
+}
+
+// VoidRsp
+
+// Removing subscription for users online
+// SubscribeFromOnlineReq --> VoidRsp
+message SubscribeFromOnlineReq {
+  // int32 COMMAND_ID = 33;
+  repeated UserOutPeer users = 1; // Users of subscriptions
+}
+
+// VoidRsp
+
+// Subscribing for groups online
+// SubscribeToGroupOnlineReq --> VoidRsp
+message SubscribeToGroupOnlineReq {
+  // int32 COMMAND_ID = 74;
+  repeated GroupOutPeer groups = 1; // Groups for subscription
+}
+
+// VoidRsp
+
+// Removing subscription for groups online
+// SubscribeFromGroupOnlineReq --> VoidRsp
+message SubscribeFromGroupOnlineReq {
+  // int32 COMMAND_ID = 75;
+  repeated GroupOutPeer groups = 1; // Groups of subscriptions
+}
+
+// VoidRsp
+

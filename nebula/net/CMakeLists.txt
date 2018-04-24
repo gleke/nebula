@@ -107,4 +107,5 @@ target_link_libraries(net)
 
 #add_subdirectory(handler/zproto/test)
 add_subdirectory(test)
+add_subdirectory(benchmark)
 #add_subdirectory(zproto/api/cc)

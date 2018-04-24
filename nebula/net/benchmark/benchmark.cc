@@ -15,6 +15,7 @@
  */
 
 #include <gflags/gflags.h>
+
 #include <wangle/bootstrap/ServerBootstrap.h>
 #include <wangle/channel/AsyncSocketHandler.h>
 #include <wangle/codec/LineBasedFrameDecoder.h>
@@ -24,9 +25,9 @@
 using namespace folly;
 using namespace wangle;
 
-DEFINE_int32(port, 8080, "echo server port");
+DEFINE_int32(port, 33333, "echo server port");
 
-typedef Pipeline<IOBufQueue&, std::unique_ptrfolly::IOBuf> EchoPipeline;
+typedef Pipeline<IOBufQueue&, std::unique_ptr<folly::IOBuf>> EchoPipeline;
 
 // the main logic of our echo server; receives a string and writes it straight
 // back
@@ -36,20 +37,29 @@ public:
   void read(Context *ctx, IOBufQueue &msg) override {
     ctx->fireWrite(msg.move());
   }
+
+
 };
 
+// 设置readBufferSettings_
+const uint64_t kDefaultMinAvailable = 65536;
+const uint64_t kDefaultAllocationSize = 65536;
+
+
+
 // where we define the chain of handlers for each messeage received
-class EchoPipelineFactory : public PipelineFactory {
+class EchoPipelineFactory : public PipelineFactory<EchoPipeline> {
 public:
   EchoPipeline::Ptr newPipeline(
-    std::shared_ptr sock) override {
+    std::shared_ptr<AsyncTransportWrapper> sock) override {
 
     auto pipeline = EchoPipeline::create();
+    pipeline->setReadBufferSettings(kDefaultMinAvailable, kDefaultAllocationSize);
     pipeline->addBack(AsyncSocketHandler(sock));
-// pipeline->addBack(LineBasedFrameDecoder());
-// pipeline->addBack(StringCodec());
+    // pipeline->addBack(LineBasedFrameDecoder());
+    // pipeline->addBack(StringCodec());
     pipeline->addBack(EchoHandler());
-// pipeline->addBack(OutputBufferingHandler());
+    pipeline->addBack(OutputBufferingHandler());
     pipeline->finalize();
     return pipeline;
   }
@@ -58,9 +68,9 @@ public:
 class MyAsyncServerSocketFactory:public AsyncServerSocketFactory{
 public:
 public:
-  std::shared_ptrfolly::AsyncSocketBase newSocket(
-    folly::SocketAddress address, int /backlog/, bool reuse,
-  const ServerSocketConfig& config) override {
+  std::shared_ptr<folly::AsyncSocketBase> newSocket(
+    folly::SocketAddress address, int /*backlog*/, bool reuse,
+    const ServerSocketConfig& config) override {
 
     auto* evb = folly::EventBaseManager::get()->getEventBase();
     std::shared_ptr<folly::AsyncServerSocket> socket(
@@ -95,7 +105,9 @@ int main(int argc, char** argv) {
   config.enableTCPFastOpen = true;
   config.fastOpenQueueSize = 65535;
   config.acceptBacklog = 65535;
-
+  // folly::AsyncServerSocket::UniquePtr socket(new AsyncServerSocket);
+  // socket
+  // server.bind(std::move(socket));
   server.channelFactory(std::make_shared<MyAsyncServerSocketFactory>());
   server.acceptorConfig(config);
   server.childPipeline(std::make_shared<EchoPipelineFactory>());

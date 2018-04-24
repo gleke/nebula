@@ -18,10 +18,12 @@
 #ifndef NET_THREAD_LOCAL_CONN_MANAGER_H_
 #define NET_THREAD_LOCAL_CONN_MANAGER_H_
 
+// #undef HAVE_LIBATOMIC
+
 #include <folly/FBVector.h>
 
 
-#include <wangle/concurrent/IOThreadPoolExecutor.h>
+#include <folly/executors/IOThreadPoolExecutor.h>
 #include <wangle/channel/Pipeline.h>
 
 #include "nebula/base/map_util.h"

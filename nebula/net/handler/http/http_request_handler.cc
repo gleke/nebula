@@ -32,7 +32,7 @@ using namespace nebula;
 void ModuleHttpInitialize() {
   static ServiceSelfRegisterTemplate g_reg_http_server(std::make_pair("http_server", "http"),
          [](const ServiceConfig& service_config,
-            const std::shared_ptr<wangle::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
+            const std::shared_ptr<folly::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
            auto service = std::make_shared<HttpServer>(service_config, io_group);
            return service;
          });

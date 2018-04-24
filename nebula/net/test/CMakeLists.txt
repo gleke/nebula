@@ -27,8 +27,8 @@ set (SRC_NET_ENGINE_SERVER_LIST
   net_engine_server_test.cc
   )
 
-#add_executable (net_engine_server_test ${SRC_NET_ENGINE_SERVER_LIST})
-#target_link_libraries (net_engine_server_test net base)
+add_executable (net_engine_server_test ${SRC_NET_ENGINE_SERVER_LIST})
+target_link_libraries (net_engine_server_test net base)
 
 set (SRC_LIST2
   thread_util_test.cc
@@ -59,3 +59,23 @@ set (SRC_LIST2
 #add_executable (telegram_server_test ${SRC_TELEGRAM_SERVER_TEST_LIST})
 #target_link_libraries (telegram_server_test net base)
 
+set (SRC_UDP_ECHO_SERVER_TEST_LIST
+  udp_echo_server_test.cc
+ )
+
+add_executable (udp_echo_server_test ${SRC_UDP_ECHO_SERVER_TEST_LIST})
+target_link_libraries (udp_echo_server_test net base)
+
+set (SRC_UDP_TEST_LIST
+  udp_test.cc
+ )
+
+add_executable (udp_test ${SRC_UDP_TEST_LIST})
+target_link_libraries (udp_test net base)
+
+set (SRC_ASYNC_UDP_SOCKET_TEST_LIST
+  async_udp_socket_test.cc
+ )
+
+add_executable (async_udp_socket_test ${SRC_ASYNC_UDP_SOCKET_TEST_LIST})
+target_link_libraries (async_udp_socket_test /usr/local/lib/libfolly.a boost_context-mt boost_filesystem-mt boost_system-mt double-conversion glog gflags event /usr/local/opt/openssl/lib/libcrypto.a /usr/local/opt/openssl/lib/libssl.a pthread z)

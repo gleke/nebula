@@ -41,13 +41,13 @@ using namespace nebula;
 void ModuleMTProtoInitialize() {
 /*
 static ServiceSelfRegisterTemplate g_reg_mtproto_tcp_client_group(std::make_pair("tcp_client_group", "mtproto"),
-             [](const ServiceConfig& service_config, const std::shared_ptr<wangle::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
+             [](const ServiceConfig& service_config, const std::shared_ptr<folly::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
                auto service= std::make_shared<TcpClientGroup<MTProtoPipeline>>(service_config, io_group);
                return service;
              });
 
 static ServiceSelfRegisterTemplate g_reg_mtproto_tcp_client(std::make_pair("tcp_client", "mtproto"),
-             [](const ServiceConfig& service_config, const std::shared_ptr<wangle::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
+             [](const ServiceConfig& service_config, const std::shared_ptr<folly::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
                auto service = std::make_shared<TcpClient<MTProtoPipeline>>(service_config, io_group);
                auto factory = std::make_shared<MTProtoClientPipelineFactory>(service.get());
                service->SetChildPipeline(factory);
@@ -55,7 +55,7 @@ static ServiceSelfRegisterTemplate g_reg_mtproto_tcp_client(std::make_pair("tcp_
              });
  */
 static ServiceSelfRegisterTemplate g_reg_mtproto_tcp_server(std::make_pair("tcp_server", "mtproto"),
-             [](const ServiceConfig& service_config, const std::shared_ptr<wangle::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
+             [](const ServiceConfig& service_config, const std::shared_ptr<folly::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
                auto service = std::make_shared<TcpServer<MTProtoPipeline>>(service_config, io_group);
                auto factory = std::make_shared<MTProtoServerPipelineFactory>(service.get());
                service->SetChildPipeline(factory);

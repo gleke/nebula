@@ -19,13 +19,13 @@
 #define NEBULA_NET_ENGINE_TCP_SERVICE_BASE_H_
 
 // #include <wangle/channel/Pipeline.h>
-#include <wangle/concurrent/IOThreadPoolExecutor.h>
+#include <folly/executors/IOThreadPoolExecutor.h>
 
 #include "nebula/net/base/tcp_conn_event_callback.h"
 #include "nebula/net/base/nebula_pipeline.h"
 #include "nebula/net/base/service_base.h"
 
-using IOThreadPoolExecutorPtr = std::shared_ptr<wangle::IOThreadPoolExecutor>;
+using IOThreadPoolExecutorPtr = std::shared_ptr<folly::IOThreadPoolExecutor>;
 
 namespace nebula {
 

@@ -21,7 +21,11 @@ void InstallModule() {
   // echo
   extern void ModuleEchoInitialize();
   ModuleEchoInitialize();
-  
+
+  // udp_echo
+  extern void ModuleUdpEchoInitialize();
+  ModuleUdpEchoInitialize();
+
   // zproto
   extern void ModuleZProtoInitialize();
   ModuleZProtoInitialize();
@@ -29,10 +33,10 @@ void InstallModule() {
   // http
   extern void ModuleHttpInitialize();
   ModuleHttpInitialize();
-  
+
   // rpc
-  extern void ModuleZRpcInitialize();
-  ModuleZRpcInitialize();
+  // extern void ModuleZRpcInitialize();
+  // ModuleZRpcInitialize();
   
   // teamtalk
   // extern void ModuleTeamtalkInitialize();
@@ -43,7 +47,7 @@ void InstallModule() {
   // ModuleTelegramInitialize();
   
   // mtproto
-  extern void ModuleMTProtoInitialize();
-  ModuleMTProtoInitialize();
+  // extern void ModuleMTProtoInitialize();
+  // ModuleMTProtoInitialize();
 }
 

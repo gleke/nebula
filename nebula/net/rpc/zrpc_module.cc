@@ -31,13 +31,13 @@ using namespace nebula;
 // 通过ModuleZProtoInitialize显式调用
 void ModuleZRpcInitialize() {
   static ServiceSelfRegisterTemplate g_reg_zrpc_tcp_client_group(std::make_pair("tcp_client_group", "zrpc"),
-           [](const ServiceConfig& service_config, const std::shared_ptr<wangle::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
+           [](const ServiceConfig& service_config, const std::shared_ptr<folly::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
              auto service= std::make_shared<TcpClientGroup<ZRpcClientPipeline>>(service_config, io_group);
              return service;
            });
 
   static ServiceSelfRegisterTemplate g_reg_zrpc_rpc_client(std::make_pair("rpc_client", "zrpc"),
-           [](const ServiceConfig& service_config, const std::shared_ptr<wangle::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
+           [](const ServiceConfig& service_config, const std::shared_ptr<folly::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
              auto service = std::make_shared<RpcClient<ZRpcClientPipeline>>(service_config, io_group);
              auto factory = std::make_shared<ZRpcClientPipelineFactory>(service.get());
              service->SetChildPipeline(factory);
@@ -45,7 +45,7 @@ void ModuleZRpcInitialize() {
            });
 
   static ServiceSelfRegisterTemplate g_reg_zproto_tcp_server(std::make_pair("rpc_server", "zrpc"),
-           [](const ServiceConfig& service_config, const std::shared_ptr<wangle::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
+           [](const ServiceConfig& service_config, const std::shared_ptr<folly::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
              auto service = std::make_shared<RpcServer<ZRpcServerPipeline>>(service_config, io_group);
              auto factory = std::make_shared<ZRpcServerPipelineFactory>(service.get());
              service->SetChildPipeline(factory);

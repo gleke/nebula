@@ -41,13 +41,13 @@ using namespace zproto;
 // 通过ModuleZProtoInitialize显式调用
 void ModuleZProtoInitialize() {
 static ServiceSelfRegisterTemplate g_reg_zproto_tcp_client_group(std::make_pair("tcp_client_group", "zproto"),
-             [](const ServiceConfig& service_config, const std::shared_ptr<wangle::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
+             [](const ServiceConfig& service_config, const std::shared_ptr<folly::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
                auto service= std::make_shared<TcpClientGroup<ZProtoPipeline>>(service_config, io_group);
                return service;
              });
 
 static ServiceSelfRegisterTemplate g_reg_zproto_tcp_client(std::make_pair("tcp_client", "zproto"),
-             [](const ServiceConfig& service_config, const std::shared_ptr<wangle::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
+             [](const ServiceConfig& service_config, const std::shared_ptr<folly::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
                auto service = std::make_shared<TcpClient<ZProtoPipeline>>(service_config, io_group);
                auto factory = std::make_shared<ZProtoClientPipelineFactory>(service.get());
                service->SetChildPipeline(factory);
@@ -55,7 +55,7 @@ static ServiceSelfRegisterTemplate g_reg_zproto_tcp_client(std::make_pair("tcp_c
              });
 
 static ServiceSelfRegisterTemplate g_reg_zproto_tcp_server(std::make_pair("tcp_server", "zproto"),
-             [](const ServiceConfig& service_config, const std::shared_ptr<wangle::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
+             [](const ServiceConfig& service_config, const std::shared_ptr<folly::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
                auto service = std::make_shared<TcpServer<ZProtoPipeline>>(service_config, io_group);
                auto factory = std::make_shared<ZProtoServerPipelineFactory>(service.get());
                service->SetChildPipeline(factory);

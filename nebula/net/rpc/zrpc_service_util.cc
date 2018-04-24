@@ -18,7 +18,7 @@
 #include "nebula/net/rpc/zrpc_service_util.h"
 
 #include <folly/MoveWrapper.h>
-#include <folly/Checksum.h>
+#include <folly/Hash/Checksum.h>
 
 #include "nebula/base/id_util.h"
 #include "nebula/base/map_util.h"

@@ -1,30 +1,35 @@
-#  Copyright (c) 2016, https://github.com/nebula-im/nebula
-#  All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# - Try to find Facebook wangle library
+# This will define
+# WANGLE_FOUND
+# WANGLE_INCLUDE_DIR
+# WANGLE_LIBRARIES
 #
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+find_package(Folly REQUIRED)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7 FATAL_ERROR)
+find_path(
+    WANGLE_INCLUDE_DIR
+    NAMES "wangle/channel/Pipeline.h"
+    HINTS
+        "/usr/local/facebook/include"
+)
 
-INCLUDE(FindPackageHandleStandardArgs)
+find_library(
+    WANGLE_LIBRARY
+    NAMES wangle
+    HINTS
+        "/usr/local/facebook/lib"
+)
 
-FIND_LIBRARY(WANGLE_LIBRARY wangle PATHS ${WANGLE_LIBRARYDIR})
-FIND_PATH(WANGLE_INCLUDE_DIR "wangle/acceptor/Acceptor.h" PATHS ${WANGLE_INCLUDEDIR})
+set(WANGLE_LIBRARIES ${WANGLE_LIBRARY} ${FOLLY_LIBRARIES})
 
-SET(WANGLE_LIBRARIES ${WANGLE_LIBRARY})
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(
+    WANGLE DEFAULT_MSG WANGLE_INCLUDE_DIR WANGLE_LIBRARIES)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Wangle
-  REQUIRED_ARGS WANGLE_INCLUDE_DIR WANGLE_LIBRARIES)
+mark_as_advanced(WANGLE_INCLUDE_DIR WANGLE_LIBRARIES WANGLE_FOUND)
 
+if(WANGLE_FOUND AND NOT WANGLE_FIND_QUIETLY)
+    message(STATUS "WANGLE: ${WANGLE_INCLUDE_DIR}")
+endif()

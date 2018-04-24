@@ -43,7 +43,7 @@ set (SRC_LIST
   engine/http_server.h
   engine/rpc_server.h
   engine/rpc_client.h
-
+  engine/udp_server.h
 
   http/http_client_lib.cc
   http/http_client_lib.h
@@ -69,6 +69,8 @@ set (SRC_LIST
   handler/nebula_handler_util.h
   handler/echo/echo_handler.cc
   handler/echo/echo_handler.h
+  handler/echo/udp_echo_handler.cc
+  handler/echo/udp_echo_handler.h
   handler/http/http_request_handler.cc
   handler/http/http_request_handler.h
 

@@ -35,13 +35,13 @@ using namespace nebula;
 // 通过ModuleEchoInitialize显式调用
 void ModuleEchoInitialize() {
   static ServiceSelfRegisterTemplate g_reg_echo_tcp_client_group(std::make_pair("tcp_client_group", "echo"),
-               [](const ServiceConfig& service_config, const std::shared_ptr<wangle::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
+               [](const ServiceConfig& service_config, const std::shared_ptr<folly::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
                  auto service= std::make_shared<TcpClientGroup<EchoPipeline>>(service_config, io_group);
                  return service;
                });
 
   static ServiceSelfRegisterTemplate g_reg_echo_tcp_client(std::make_pair("tcp_client", "echo"),
-               [](const ServiceConfig& service_config, const std::shared_ptr<wangle::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
+               [](const ServiceConfig& service_config, const std::shared_ptr<folly::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
                  auto service = std::make_shared<TcpClient<EchoPipeline>>(service_config, io_group);
                  auto factory = std::make_shared<EchoClientPipelineFactory>(service.get());
                  service->SetChildPipeline(factory);
@@ -49,7 +49,7 @@ void ModuleEchoInitialize() {
                });
 
   static ServiceSelfRegisterTemplate g_reg_echo_tcp_server(std::make_pair("tcp_server", "echo"),
-               [](const ServiceConfig& service_config, const std::shared_ptr<wangle::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
+               [](const ServiceConfig& service_config, const std::shared_ptr<folly::IOThreadPoolExecutor>& io_group) -> ServiceBasePtr {
                  auto service = std::make_shared<TcpServer<EchoPipeline>>(service_config, io_group);
                  auto factory = std::make_shared<EchoServerPipelineFactory>(service.get());
                  service->SetChildPipeline(factory);

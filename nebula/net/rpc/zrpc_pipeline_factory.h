@@ -21,7 +21,7 @@
 #include <wangle/service/Service.h>
 #include <wangle/service/ExecutorFilter.h>
 #include <wangle/channel/AsyncSocketHandler.h>
-#include <wangle/concurrent/CPUThreadPoolExecutor.h>
+#include <folly/executors/CPUThreadPoolExecutor.h>
 
 #include "nebula/net/rpc/zrpc_client_handler.h"
 #include "nebula/net/rpc/zrpc_server_handler.h"
@@ -49,7 +49,7 @@ public:
   
 private:
   wangle::ExecutorFilter<zproto::RpcRequestPtr, zproto::ProtoRpcResponsePtr> rpc_service_{
-    std::make_shared<wangle::CPUThreadPoolExecutor>(10),
+    std::make_shared<folly::CPUThreadPoolExecutor>(10),
     std::make_shared<ZRpcService>()};
   
   nebula::ServiceBase* service_{nullptr};

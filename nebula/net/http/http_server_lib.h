@@ -154,7 +154,7 @@ class HTTPServerLib final {
              std::function<void(std::exception_ptr)> onError = nullptr);
 
   // Add by @benqi: 可指定IOThreadPoolExecutor启动
-  void start(std::shared_ptr<wangle::IOThreadPoolExecutor> ioGroup, std::function<void()> onSuccess = nullptr,
+  void start(std::shared_ptr<folly::IOThreadPoolExecutor> ioGroup, std::function<void()> onSuccess = nullptr,
              std::function<void(std::exception_ptr)> onError = nullptr);
 
   /**

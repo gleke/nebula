@@ -21,7 +21,7 @@
 #include <folly/SingletonThreadLocal.h>
 
 namespace nebula {
-  
+
 ///////////////////////////////////////////////////////////////////////////////////////
 uint64_t ThreadLocalConnManager::OnNewConnection(wangle::PipelineBase* pipeline) {
     uint32_t conn_id = 0;
@@ -49,10 +49,11 @@ bool ThreadLocalConnManager::OnConnectionClosed(uint64_t conn_id) {
 }
 
 ThreadLocalConnManager& GetConnManagerByThreadLocal() {
-    static folly::SingletonThreadLocal<ThreadLocalConnManager> g_cache([]() {
-        return new ThreadLocalConnManager();
-    });
-    return g_cache.get();
+    return folly::SingletonThreadLocal<ThreadLocalConnManager>::get();
+//  g_cache([]() {
+//        return new ThreadLocalConnManager();
+//    });
+//    return g_cache.get();
 }
 
 }

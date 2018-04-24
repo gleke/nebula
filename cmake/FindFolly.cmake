@@ -1,28 +1,35 @@
-#  Copyright (c) 2016, https://github.com/nebula-im/nebula
-#  All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# - Try to find Facebook folly library
+# This will define
+# FOLLY_FOUND
+# FOLLY_INCLUDE_DIR
+# FOLLY_LIBRARIES
 #
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+find_package(DoubleConversion REQUIRED)
 
-INCLUDE(FindPackageHandleStandardArgs)
+find_path(
+    FOLLY_INCLUDE_DIR
+    NAMES "folly/String.h"
+    HINTS
+        "/usr/local/facebook/include"
+)
 
-FIND_LIBRARY(FOLLY_LIBRARY folly PATHS ${FOLLY_LIBRARYDIR})
-FIND_PATH(FOLLY_INCLUDE_DIR "folly/String.h" PATHS ${FOLLY_INCLUDEDIR})
+find_library(
+    FOLLY_LIBRARY
+    NAMES folly
+    HINTS
+        "/usr/local/facebook/lib"
+)
 
-SET(FOLLY_LIBRARIES ${FOLLY_LIBRARY})
+set(FOLLY_LIBRARIES ${FOLLY_LIBRARY} ${DOUBLE_CONVERSION_LIBRARY})
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Folly
-  REQUIRED_ARGS FOLLY_INCLUDE_DIR FOLLY_LIBRARIES)
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(
+    FOLLY DEFAULT_MSG FOLLY_INCLUDE_DIR FOLLY_LIBRARIES)
 
+mark_as_advanced(FOLLY_INCLUDE_DIR FOLLY_LIBRARIES FOLLY_FOUND)
+
+if(FOLLY_FOUND AND NOT FOLLY_FIND_QUIETLY)
+    message(STATUS "FOLLY: ${FOLLY_INCLUDE_DIR}")
+endif()

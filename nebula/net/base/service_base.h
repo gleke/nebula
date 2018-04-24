@@ -18,7 +18,7 @@
 #ifndef NEBULA_NET_BASE_SERVICE_BASE_H_
 #define NEBULA_NET_BASE_SERVICE_BASE_H_
 
-#include <wangle/concurrent/IOThreadPoolExecutor.h>
+#include <folly/executors/IOThreadPoolExecutor.h>
 
 #include "nebula/net/base/service_config.h"
 // #include "nebula/base/factory_object.h"
@@ -81,7 +81,7 @@ protected:
 using ServiceBasePtr = std::shared_ptr<ServiceBase>;
 
 using NewServiceBaseFunc = std::function<
-  ServiceBasePtr(const ServiceConfig&, const std::shared_ptr<wangle::IOThreadPoolExecutor>&)
+  ServiceBasePtr(const ServiceConfig&, const std::shared_ptr<folly::IOThreadPoolExecutor>&)
 >;
   
 using ServiceSelfRegisterFactoryManager = FuncFactoryManager<

@@ -17,8 +17,8 @@
 
 #include "nebula/net/thread_group_list_manager.h"
 
-#include <wangle/concurrent/IOThreadPoolExecutor.h>
-#include <wangle/concurrent/CPUThreadPoolExecutor.h>
+#include <folly/Random.h>
+#include <folly/executors/CPUThreadPoolExecutor.h>
 
 #include "nebula/base/logger/glog_util.h"
 #include "nebula/net/thread_local_conn_manager.h"
@@ -27,7 +27,7 @@ namespace nebula {
   
 // folly::Singleton<ThreadGroupListManager> g_thread_group_list_manager;
 
-ThreadGroup::ThreadGroup(std::shared_ptr<wangle::ThreadPoolExecutor> pool,
+ThreadGroup::ThreadGroup(std::shared_ptr<folly::ThreadPoolExecutor> pool,
                          ThreadType thread_type,
                          const NewThreadDataCallback& cb)
   : thread_pool_(pool),
@@ -38,7 +38,7 @@ ThreadGroup::ThreadGroup(std::shared_ptr<wangle::ThreadPoolExecutor> pool,
 }
 
 
-void ThreadGroup::ThreadGroupObserver::threadStarted(wangle::ThreadPoolExecutor::ThreadHandle* handle) {
+void ThreadGroup::ThreadGroupObserver::threadStarted(folly::ThreadPoolExecutor::ThreadHandle* handle) {
   // LOG(INFO) << "threadStarted - ";
   if (callback_) {
     // LOG(INFO) << "threadStarted - ";
@@ -47,7 +47,7 @@ void ThreadGroup::ThreadGroupObserver::threadStarted(wangle::ThreadPoolExecutor:
   }
 }
 
-void ThreadGroup::ThreadGroupObserver::threadStopped(wangle::ThreadPoolExecutor::ThreadHandle* handle) {
+void ThreadGroup::ThreadGroupObserver::threadStopped(folly::ThreadPoolExecutor::ThreadHandle* handle) {
   if (callback_) {
     // callback_(thread_group_, handle);
   }
@@ -118,7 +118,7 @@ bool ThreadGroupListManager::Initialize(const ThreadGroupListOption& options) {
 
 ThreadGroupPtr ThreadGroupListManager::MakeThreadGroup(ThreadType thread_type, int thread_size) {
   ThreadGroupPtr thread_group;
-  std::shared_ptr<wangle::ThreadPoolExecutor> pool;
+  std::shared_ptr<folly::ThreadPoolExecutor> pool;
   switch (thread_type) {
     case ThreadType::NORMAL:
         break;
@@ -126,11 +126,11 @@ ThreadGroupPtr ThreadGroupListManager::MakeThreadGroup(ThreadType thread_type, i
     case ThreadType::CONN_CLIENT:
     case ThreadType::CONN:
     case ThreadType::FIBER:
-        pool = std::make_shared<wangle::IOThreadPoolExecutor>(thread_size);
+        pool = std::make_shared<folly::IOThreadPoolExecutor>(thread_size);
         break;
     case ThreadType::DB:
     case ThreadType::REDIS:
-        pool = std::make_shared<wangle::CPUThreadPoolExecutor>(thread_size);
+        pool = std::make_shared<folly::CPUThreadPoolExecutor>(thread_size);
         break;
     default:
         LOG(ERROR) << "MakeThreadGroup - thread_type: " << ToString(thread_type) << " not support!!!";
@@ -139,7 +139,7 @@ ThreadGroupPtr ThreadGroupListManager::MakeThreadGroup(ThreadType thread_type, i
   
   if (pool) {
     auto cb = [&](ThreadGroup* group,
-                wangle::ThreadPoolExecutor::ThreadHandle* handle) -> size_t {
+                  folly::ThreadPoolExecutor::ThreadHandle* handle) -> size_t {
       size_t idx = thread_datas_.size();
       
       folly::EventBase* evb = nullptr;
@@ -149,7 +149,7 @@ ThreadGroupPtr ThreadGroupListManager::MakeThreadGroup(ThreadType thread_type, i
         case ThreadType::CONN_CLIENT:
         case ThreadType::CONN:
         case ThreadType::FIBER:
-          evb = wangle::IOThreadPoolExecutor::getEventBase(handle);
+          evb = folly::IOThreadPoolExecutor::getEventBase(handle);
           evb->runImmediatelyOrRunInEventBaseThreadAndWait([idx](){
               LOG(INFO) << "MakeThreadGroup - thread_idx: " << idx;
               GetConnManagerByThreadLocal().set_thread_id(idx);
@@ -174,8 +174,8 @@ ThreadGroupPtr ThreadGroupListManager::MakeThreadGroup(ThreadType thread_type, i
 
 
 // 通过ThreadType获取IOThreadPoolExecutor
-std::shared_ptr<wangle::IOThreadPoolExecutor> ThreadGroupListManager::GetIOThreadPoolExecutor(ThreadType thread_type) const {
-  std::shared_ptr<wangle::IOThreadPoolExecutor> pool;
+std::shared_ptr<folly::IOThreadPoolExecutor> ThreadGroupListManager::GetIOThreadPoolExecutor(ThreadType thread_type) const {
+  std::shared_ptr<folly::IOThreadPoolExecutor> pool;
   if (thread_type == ThreadType::CONN_ACCEPT ||
       thread_type == ThreadType::CONN_CLIENT ||
       thread_type == ThreadType::CONN ||
@@ -184,14 +184,14 @@ std::shared_ptr<wangle::IOThreadPoolExecutor> ThreadGroupListManager::GetIOThrea
     auto thread_group = thread_groups_[idx];
     if (thread_group) {
       auto p = thread_group->GetThreadPool();
-      pool = std::static_pointer_cast<wangle::IOThreadPoolExecutor>(p);
+      pool = std::static_pointer_cast<folly::IOThreadPoolExecutor>(p);
       if (!pool) {
         LOG(ERROR) << "GetIOThreadPoolExecutor - Not find thread_type: " << ToString(thread_type)
         << ", idx:" << idx << " in thread_groups!!!!";
       }
     }
     // auto idx = thread_groups_[static_cast<int>(thread_type);
-    // pool = std::static_pointer_cast<wangle::IOThreadPoolExecutor>(]->GetThreadPool());
+    // pool = std::static_pointer_cast<folly::IOThreadPoolExecutor>(]->GetThreadPool());
   }
   return pool;
 }

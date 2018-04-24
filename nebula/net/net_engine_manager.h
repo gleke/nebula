@@ -55,7 +55,7 @@ public :
     return thread_groups_->GetEventBaseByThreadID(idx);
   }
   
-  std::shared_ptr<wangle::IOThreadPoolExecutor> GetIOThreadPoolExecutor(ThreadType thread_type) const {
+  std::shared_ptr<folly::IOThreadPoolExecutor> GetIOThreadPoolExecutor(ThreadType thread_type) const {
     return thread_groups_->GetIOThreadPoolExecutor(thread_type);
   }
   
@@ -97,7 +97,7 @@ protected:
   std::shared_ptr<ThreadGroupListManager> thread_groups_;
   
   // 即将运行的，从Install来
-  typedef std::vector<std::pair<std::shared_ptr<ServiceConfig>, std::shared_ptr<wangle::IOThreadPoolExecutor>>> InstalledServiceInfoList;
+  typedef std::vector<std::pair<std::shared_ptr<ServiceConfig>, std::shared_ptr<folly::IOThreadPoolExecutor>>> InstalledServiceInfoList;
   InstalledServiceInfoList installeds_;
   
   // 配置文件里

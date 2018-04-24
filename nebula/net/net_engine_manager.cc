@@ -52,6 +52,7 @@ void NetEngineManager::Install(const std::string& name,
   auto io_group = thread_groups_->GetIOThreadPoolExecutor(ThreadType::CONN);
   if (io_group) {
     if (type != "tcp_server" &&
+        type != "udp_server" &&
         type != "tcp_client" &&
         type != "http_server" &&
         type != "rpc_server" &&
@@ -63,6 +64,7 @@ void NetEngineManager::Install(const std::string& name,
     }
   } else {
     if (type == "tcp_server" ||
+        type == "udp_server" ||
         type == "http_server" ||
         type == "rpc_server") {
       io_group = thread_groups_->GetIOThreadPoolExecutor(ThreadType::CONN_ACCEPT);
@@ -183,6 +185,7 @@ bool NetEngineManager::RegisterServiceBase(std::shared_ptr<ServiceBase> service)
       rv = true;
     }
   } else if (service->GetServiceType() == "tcp_server" ||
+             service->GetServiceType() == "udp_server" ||
              service->GetServiceType() == "http_server" ||
              service->GetServiceType() == "rpc_server") {
     // tcp_server

@@ -29,7 +29,7 @@
 
 #include "nebula/net/http/http_server_lib.h"
 
-#include <folly/ThreadName.h>
+#include <folly/System/ThreadName.h>
 #include <folly/io/async/EventBaseManager.h>
 
 #include "nebula/net/http/http_server_lib_acceptor.h"
@@ -43,8 +43,8 @@ using folly::AsyncServerSocket;
 using folly::EventBase;
 using folly::EventBaseManager;
 using folly::SocketAddress;
-using wangle::IOThreadPoolExecutor;
-using wangle::ThreadPoolExecutor;
+using folly::IOThreadPoolExecutor;
+using folly::ThreadPoolExecutor;
 
 namespace proxygen {
 
@@ -154,7 +154,7 @@ void HTTPServerLib::start(std::function<void()> onSuccess,
 }
 
 // Add by @benqi: 可指定IOThreadPoolExecutor启动
-void HTTPServerLib::start(std::shared_ptr<wangle::IOThreadPoolExecutor> ioGroup, std::function<void()> onSuccess,
+void HTTPServerLib::start(std::shared_ptr<folly::IOThreadPoolExecutor> ioGroup, std::function<void()> onSuccess,
                           std::function<void(std::exception_ptr)> onError) {
   // mainEventBase_ = EventBaseManager::get()->getEventBase();
   

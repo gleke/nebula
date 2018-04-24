@@ -1,4 +1,4 @@
-#  Copyright (c) 2016, https://github.com/nebula-im/nebula
+#  Copyright (c) 2018, https://github.com/nebulaim/nebula
 #  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,62 +14,69 @@
 # limitations under the License.
 #
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.7 FATAL_ERROR)
 
-project(nebula C CXX)
-
-add_compile_options(-std=c++1y)
-add_compile_options(-fPIC)
-add_compile_options(-DFOLLY_HAVE_CLOCK_GETTIME=1)
-
+# This is necessary so that find_package can find the "Find$x.cmake" files.
+# set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-find_package(Boost REQUIRED COMPONENTS system thread filesystem)
-find_package(OpenSSL REQUIRED)
-find_package(Threads REQUIRED)
-find_library(GLOG_LIBRARY_PATH glog)
-find_library(GFLAGS_LIBRARY_PATH gflags)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+# package information
+set(PACKAGE_NAME      "nebula")
+set(PACKAGE_VERSION   "0.11")
+set(PACKAGE_STRING    "${PACKAGE_NAME} ${PACKAGE_VERSION}")
+set(PACKAGE_TARNAME   "${PACKAGE_NAME}-${PACKAGE_VERSION}")
+set(PACKAGE_BUGREPORT "https://github.com/nebulaim/nebula/issues")
+
+project(${PACKAGE_NAME} C CXX)
+
+# Check Platform Requirement
+if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+    message(FATAL_ERROR "nebula requires a 64bit OS")
+endif()
+
+find_package(
+        Boost 1.58.0 REQUIRED
+        COMPONENTS
+        filesystem
+        system
+)
+
 find_package(Folly REQUIRED)
+find_package(GFlags REQUIRED)
+find_package(Glog REQUIRED)
+find_package(Threads REQUIRED)
 find_package(Wangle REQUIRED)
-find_package(Proxygen REQUIRED COMPONENTS proxygenhttpserver proxygenlib)
-find_package(MySQL REQUIRED)
+find_package(Proxygen REQUIRED)
 
-include_directories(
-${CMAKE_SOURCE_DIR}
-${BOOST_INCLUDE_DIR}
-${FOLLY_INCLUDE_DIR}
-${WANGLE_INCLUDE_DIR}
-${PROXYGEN_INCLUDE_DIR}
-${MYSQL_INCLUDE_DIR}
-${OPENSSL_INCLUDE_DIR}
-${INCLUDE_DIR}
+include(CheckFunctionExists)
+include(NebulaCompilerOptions)
+
+set(NEBULA_HOME ${CMAKE_CURRENT_SOURCE_DIR})
+
+# set(TP_PROJECTS_DIR "nebula/third-party")
+# So that qualified includes work. E.g. #include "beringei/client/$x.h"
+include_directories(${NEBULA_HOME})
+
+# So that all subsequent directories have access to
+# folly, proxygen and wangle
+include_directories(${FOLLY_INCLUDE_DIR} ${PROXYGEN_INCLUDE_DIR} ${WANGLE_INCLUDE_DIR})
+
+# add_subdirectory(${TP_PROJECTS_DIR}/gtest)
+# include_directories(${GTEST_INCLUDE_DIRS} ${GMOCK_INCLUDE_DIRS})
+
+# enable_testing()
+add_subdirectory("nebula")
+
+# modules / depends
+file(GLOB NEBULA_CMAKE_FILES "cmake/*.cmake")
+install(
+        FILES ${NEBULA_CMAKE_FILES}
+        DESTINATION cmake
+        COMPONENT dev
 )
-
-#link_directories(/usr/local/Cellar/openssl/1.0.2d_1/lib /opt/local/lib /usr/local/lib /usr/local/mysql/lib ${PROJECT_BINARY_DIR}/lib)
-
-message("Folly lib: " ${FOLLY_LIBRARY})
-message("Wangle lib: " ${WANGLE_LIBRARY})
-message("Proxygen lib: " ${PROXYGEN_LIBRARY})
-message("MySQL lib: " ${MYSQL_LIBRARY})
-
-link_directories(
-/usr/local/lib
-${FOLLY_LIBRARYDIR}
-${WANGLE_LIBRARYDIR}
-${PROXYGEN_LIBRARYDIR}
-${BOOST_LIBRARYDIR}
-${MYSQL_LIBRARYDIR}
-${OPENSSL_LIBRARIESDIR}
-${PROJECT_BINARY_DIR}/lib
-)
-
-#set(CMAKE_EXE_LINKER_FLAGS "-lpthread -lrt -ldl")
-
-add_subdirectory(nebula)
-add_subdirectory(frontend)
-add_subdirectory(proto)
-

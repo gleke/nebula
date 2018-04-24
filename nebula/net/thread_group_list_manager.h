@@ -26,12 +26,12 @@
 
 #include <folly/Conv.h>
 #include <folly/Range.h>
-#include <folly/ThreadName.h>
+#include <folly/System/ThreadName.h>
 #include <folly/Singleton.h>
 #include <folly/io/async/EventBase.h>
 
-#include <wangle/concurrent/ThreadFactory.h>
-#include <wangle/concurrent/IOThreadPoolExecutor.h>
+#include <folly/executors/thread_factory/ThreadFactory.h>
+#include <folly/executors/IOThreadPoolExecutor.h>
 
 #include "nebula/base/configurable.h"
 
@@ -90,12 +90,12 @@ struct ThreadInfo {
 
 // struct ThreadData;
 class ThreadGroup;
-typedef std::function<size_t(ThreadGroup*, wangle::ThreadPoolExecutor::ThreadHandle*)> NewThreadDataCallback;
+typedef std::function<size_t(ThreadGroup*, folly::ThreadPoolExecutor::ThreadHandle*)> NewThreadDataCallback;
     
 class ThreadGroup {
 public:
   //////////////////////////////////////////////////////////////////////////////////////////
-  class ThreadGroupObserver : public wangle::ThreadPoolExecutor::Observer {
+  class ThreadGroupObserver : public folly::ThreadPoolExecutor::Observer {
   public:
     explicit ThreadGroupObserver(ThreadGroup* thread_group, const NewThreadDataCallback& cb)
       : thread_group_(thread_group),
@@ -103,8 +103,8 @@ public:
     }
     
     // Impl from Observer
-    void threadStarted(wangle::ThreadPoolExecutor::ThreadHandle* handle) override;
-    void threadStopped(wangle::ThreadPoolExecutor::ThreadHandle* handle) override;
+    void threadStarted(folly::ThreadPoolExecutor::ThreadHandle* handle) override;
+    void threadStopped(folly::ThreadPoolExecutor::ThreadHandle* handle) override;
     
   private:
     ThreadGroup* thread_group_;
@@ -112,14 +112,14 @@ public:
   };
   
   //////////////////////////////////////////////////////////////////////////////////////////
-  ThreadGroup(std::shared_ptr<wangle::ThreadPoolExecutor> pool, ThreadType thread_type, const NewThreadDataCallback& cb);
+  ThreadGroup(std::shared_ptr<folly::ThreadPoolExecutor> pool, ThreadType thread_type, const NewThreadDataCallback& cb);
   ~ThreadGroup() = default;
   
   ThreadType GetThreadType() const {
     return thread_type_;
   }
   
-  std::shared_ptr<wangle::ThreadPoolExecutor> GetThreadPool() const {
+  std::shared_ptr<folly::ThreadPoolExecutor> GetThreadPool() const {
     return thread_pool_;
   }
   
@@ -127,7 +127,7 @@ public:
     return "";
   }
   
-  std::shared_ptr<wangle::ThreadPoolExecutor> thread_pool_;   // IO, CPU
+  std::shared_ptr<folly::ThreadPoolExecutor> thread_pool_;   // IO, CPU
   ThreadType thread_type_ {ThreadType::NORMAL};
   std::vector<size_t> thread_idxs_;
   
@@ -177,7 +177,7 @@ public:
   }
   
   // 通过ThreadType获取IOThreadPoolExecutor
-  std::shared_ptr<wangle::IOThreadPoolExecutor> GetIOThreadPoolExecutor(ThreadType thread_type) const;
+  std::shared_ptr<folly::IOThreadPoolExecutor> GetIOThreadPoolExecutor(ThreadType thread_type) const;
   
   // 通过ThreadType找
   ThreadGroupPtr GetThreadGroupByThreadType(ThreadType thread_type) const {

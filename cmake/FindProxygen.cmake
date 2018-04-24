@@ -1,27 +1,48 @@
-#  Copyright (c) 2016, https://github.com/nebula-im/nebula
-#  All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# - Try to find Facebook proxygen library
+# This will define
+# PROXYFGEN_FOUND
+# PROXYGEN_INCLUDE_DIR
+# PROXYGEN_LIBRARIES
 #
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+find_package(Folly REQUIRED)
+find_package(Wangle REQUIRED)
 
-INCLUDE(FindPackageHandleStandardArgs)
+find_path(
+  PROXYGEN_INCLUDE_DIR
+  NAMES "proxygen/httpserver/HTTPServer.h"
+  HINTS
+    "/usr/local/facebook/include"
+)
 
-FIND_LIBRARY(PROXYGEN_LIBRARY proxygenlib proxygenhttpserver PATHS ${PROXYGEN_LIBRARYDIR})
-FIND_PATH(PROXYGEN_INCLUDE_DIR "proxygen/httpserver/HTTPServer.h" PATHS ${PROXYGEN_INCLUDEDIR})
+find_library(
+  PROXYGEN_LIBRARY
+  NAMES proxygenlib
+  HINTS
+    "/usr/local/facebook/lib"
+  )
 
-SET(PROXYGEN_LIBRARIES ${PROXYGEN_LIBRARY})
+find_library(
+  PROXYGEN_HTTP_SERVER
+  NAMES proxygenhttpserver
+  HINTS
+    "/usr/local/facebook/lib"
+)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Proxygen 
-  REQUIRED_ARGS PROXYGEN_INCLUDE_DIR PROXYGEN_LIBRARIES)
+set(PROXYGEN_LIBRARIES
+  ${PROXYGEN_LIBRARY}
+  ${PROXYGEN_HTTP_SERVER}
+)
+
+set(PROXYGEN_LIBRARIES ${PROXYGEN_LIBRARIES} ${FOLLY_LIBRARIES} ${WANGLE_LIBRARIES})
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(
+  PROXYGEN DEFAULT_MSG PROXYGEN_INCLUDE_DIR PROXYGEN_LIBRARIES)
+
+mark_as_advanced(PROXYGEN_INCLUDE_DIR PROXYGEN_LIBRARIES PROXYGEN_FOUND)
+
+if(PROXYGEN_FOUND AND NOT PROXYGEN_FIND_QUIETLY)
+  message(STATUS "PROXYGEN: ${PROXYGEN_INCLUDE_DIR}")
+endif()

@@ -26,6 +26,10 @@ void InstallModule() {
   extern void ModuleUdpEchoInitialize();
   ModuleUdpEchoInitialize();
 
+  // pingpong
+  extern void ModulePingpongInitialize();
+  ModulePingpongInitialize();
+
   // zproto
   extern void ModuleZProtoInitialize();
   ModuleZProtoInitialize();

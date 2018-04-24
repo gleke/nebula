@@ -73,6 +73,13 @@ set (SRC_UDP_TEST_LIST
 add_executable (udp_test ${SRC_UDP_TEST_LIST})
 target_link_libraries (udp_test net base)
 
+set (SRC_PINGPONG_TEST_LIST
+  pingpong_server_test.cc
+ )
+
+add_executable (pingpong_server_test ${SRC_PINGPONG_TEST_LIST})
+target_link_libraries (pingpong_server_test net base)
+
 set (SRC_ASYNC_UDP_SOCKET_TEST_LIST
   async_udp_socket_test.cc
  )

@@ -71,6 +71,8 @@ set (SRC_LIST
   handler/echo/echo_handler.h
   handler/echo/udp_echo_handler.cc
   handler/echo/udp_echo_handler.h
+  handler/pingpong/pingpong_handler.cc
+  handler/pingpong/pingpong_handler.h
   handler/http/http_request_handler.cc
   handler/http/http_request_handler.h
 

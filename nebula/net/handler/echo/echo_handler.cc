@@ -63,7 +63,7 @@ void ModuleEchoInitialize() {
 void EchoHandler::transportActive(Context* ctx) {
   auto pipeline = dynamic_cast<EchoPipeline*>(ctx->getPipeline());
   OnNewConnection(pipeline, pipeline->getTransportInfo()->remoteAddr->getAddressStr());
-  
+
   LOG(INFO) << "transportActive - conn_id = " << conn_id_
             << ", ZProtoHandler - Connection connected by "
             << remote_address_
@@ -79,7 +79,7 @@ void EchoHandler::transportInactive(Context* ctx) {
             << ", Connection closed by "
             << remote_address_
             << ", conn_info: " << service_->GetServiceConfig().ToString();
-            
+
   OnConnectionClosed();
 }
 

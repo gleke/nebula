@@ -1,0 +1,30 @@
+[
+  {
+    "name":"zrpc_server_test",
+    "type":"rpc_server",
+    "proto":"zrpc",
+    "hosts":"0.0.0.0",
+    "port":22345,
+  },
+  {
+    "name":"zrpc_client_test",
+    "type":"rpc_client",
+    "proto":"zrpc",
+    "hosts":"127.0.0.1",
+    "port":22345,
+  },
+  {
+    "name":"udp_echo_server_test",
+    "type":"udp_server",
+    "proto":"echo",
+    "hosts":"0.0.0.0",
+    "port":22345,
+  },
+  {
+    "name":"pingpong_server_test",
+    "type":"tcp_server",
+    "proto":"pingpong",
+    "hosts":"0.0.0.0",
+    "port":33333,
+  }
+]

@@ -39,8 +39,8 @@ bool BaseServer::LoadConfig(const std::string& config_path) {
 
 bool BaseServer::Initialize() {
   BaseDaemon::Initialize();
-  InstallModule();
-  
+  this->InstallModule();
+
   // 初始化程序
   auto thread_groups = std::make_shared<ThreadGroupListManager>(thread_group_options_);
   auto net_engine_manager = NetEngineManager::GetInstance();
@@ -78,10 +78,13 @@ bool BaseServer::Run() {
   return true;
 }
 
-
 bool BaseServer::Destroy() {
   return BaseDaemon::Destroy();
 }
-  
+
+void BaseServer::InstallModule() {
+  ::InstallModule();
+}
+
 }
 

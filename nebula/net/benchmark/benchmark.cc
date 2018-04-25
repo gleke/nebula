@@ -26,6 +26,9 @@ using namespace folly;
 using namespace wangle;
 
 DEFINE_int32(port, 33333, "echo server port");
+DEFINE_int32(size, 32000, "size");
+DEFINE_int32(threads, 0, "threads");
+DEFINE_int32(buffering, 0, "buffering");
 
 typedef Pipeline<IOBufQueue&, std::unique_ptr<folly::IOBuf>> EchoPipeline;
 
@@ -42,8 +45,8 @@ public:
 };
 
 // 设置readBufferSettings_
-const uint64_t kDefaultMinAvailable = 65536;
-const uint64_t kDefaultAllocationSize = 65536;
+const uint64_t kDefaultMinAvailable = 16*1024;
+const uint64_t kDefaultAllocationSize = 32*1024;
 
 
 
@@ -54,12 +57,14 @@ public:
     std::shared_ptr<AsyncTransportWrapper> sock) override {
 
     auto pipeline = EchoPipeline::create();
-    pipeline->setReadBufferSettings(kDefaultMinAvailable, kDefaultAllocationSize);
+    pipeline->setReadBufferSettings(FLAGS_size, FLAGS_size);
     pipeline->addBack(AsyncSocketHandler(sock));
     // pipeline->addBack(LineBasedFrameDecoder());
     // pipeline->addBack(StringCodec());
     pipeline->addBack(EchoHandler());
-    pipeline->addBack(OutputBufferingHandler());
+    if (FLAGS_buffering != 0) {
+      pipeline->addBack(OutputBufferingHandler());
+    }
     pipeline->finalize();
     return pipeline;
   }
@@ -100,6 +105,18 @@ int main(int argc, char** argv) {
   ServerBootstrap<EchoPipeline> server;
   ServerSocketConfig config;
 
+  int io_group_size = FLAGS_threads;
+  if (FLAGS_threads <= 0) {
+    io_group_size = std::thread::hardware_concurrency();
+    if (io_group_size <= 0) {
+      // Reasonable mid-point for concurrency when actual value unknown
+      io_group_size = 8;
+    }
+  }
+
+  auto io_group = std::make_shared<IOThreadPoolExecutor>(
+    io_group_size, std::make_shared<NamedThreadFactory>("IO Thread"));
+
   config.acceptBacklog = 65535;
   config.maxNumPendingConnectionsPerWorker = 65535;
   config.enableTCPFastOpen = true;
@@ -111,6 +128,7 @@ int main(int argc, char** argv) {
   server.channelFactory(std::make_shared<MyAsyncServerSocketFactory>());
   server.acceptorConfig(config);
   server.childPipeline(std::make_shared<EchoPipelineFactory>());
+  server.group(io_group);
   server.bind(FLAGS_port);
   server.waitForStop();
 

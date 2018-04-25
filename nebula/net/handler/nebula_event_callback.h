@@ -72,7 +72,6 @@ struct NebulaEventCallback {
   static NewConnectionFunc g_new_connection;
   static DataReceivedFunc g_data_received;
   static ConnectionClosedFunc g_connection_closed;
-  
 };
 
 template <typename Pipeline, typename Message>

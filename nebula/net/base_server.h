@@ -45,7 +45,9 @@ protected:
   bool Initialize() override;
   bool Run() override;
   bool Destroy() override;
-  
+
+  virtual void InstallModule();
+
   // std::map<uint64_t, uint32_t> connected_server_map_;
   ServicesConfig services_config_;
   

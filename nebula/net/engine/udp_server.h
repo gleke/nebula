@@ -45,11 +45,12 @@ public:
 
   bool Start() override {
     LOG(INFO) << "UdpServer - Start service: " << config_.ToString();
-    server_.pipeline(factory_);
     server_.channelFactory(std::make_shared<wangle::AsyncUDPServerSocketFactory>());
+    server_.pipeline(factory_);
     server_.group(io_group_);
     folly::SocketAddress addr(config_.hosts, config_.port);
     server_.bindImpl(addr);
+    return true;
   }
 
   bool Pause() override {

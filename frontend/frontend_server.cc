@@ -23,12 +23,12 @@
 bool FrontendServer::Initialize() {
   // 初始化处理器
   MTProtoEventCallback::Initializer(FrontendServerHandler::OnNewConnectionCallback,
-                                      FrontendServerHandler::OnDataReceivedCallback,
-                                    FrontendServerHandler::OnConnectionClosedCallback);
+        FrontendServerHandler::OnDataReceivedCallback,
+        FrontendServerHandler::OnConnectionClosedCallback);
 
   ZProtoEventCallback::Initializer(ClientBaseHandler::OnNewConnectionCallback,
-                                   ClientBaseHandler::OnDataReceivedCallback,
-                                   ClientBaseHandler::OnConnectionClosedCallback);
+        ClientBaseHandler::OnDataReceivedCallback,
+        ClientBaseHandler::OnConnectionClosedCallback);
 
   // 注册服务
   // 客户端连接服务

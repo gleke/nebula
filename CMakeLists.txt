@@ -72,6 +72,7 @@ include_directories(${FOLLY_INCLUDE_DIR} ${PROXYGEN_INCLUDE_DIR} ${WANGLE_INCLUD
 
 # enable_testing()
 add_subdirectory("nebula")
+add_subdirectory("relay")
 
 # modules / depends
 file(GLOB NEBULA_CMAKE_FILES "cmake/*.cmake")

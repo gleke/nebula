@@ -82,8 +82,8 @@ folly::Future<folly::Unit> PingpongHandler::close(Context* ctx) {
 }
 
 // 设置readBufferSettings_
-const uint64_t kDefaultMinAvailable = 128*1024;
-const uint64_t kDefaultAllocationSize = 128*1024;
+const uint64_t kDefaultMinAvailable = 32*1024;
+const uint64_t kDefaultAllocationSize = 64*1024;
 
 ///////////////////////////////////////////////////////////////////////////////////////
 PingpongPipeline::Ptr PingpongServerPipelineFactory::newPipeline(std::shared_ptr<folly::AsyncTransportWrapper> sock) {

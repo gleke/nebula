@@ -20,27 +20,35 @@
 
 #include "nebula/net/handler/nebula_base_handler.h"
 
-#include "relay/relay_table.h"
+struct Endpoint {
+  folly::SocketAddress addr;
+  uint64_t last_recved_time;
+};
 
-class UdpTGVoipPipeline : public wangle::InboundHandler<wangle::AcceptPipelineType, folly::Unit>,
-                          public RelayTableManager::Callback {
+struct RelayTable {
+  std::string peer_tag;
+  std::list<Endpoint> peers;
+};
+
+class UdpTGVoipPipeline : public wangle::InboundHandler<wangle::AcceptPipelineType, folly::Unit> {
 public:
-  UdpTGVoipPipeline();
+//  UdpTGVoipPipeline();
+//  ~UdpTGVoipPipeline();
 
   // Impl InboundHandler
   void read(Context* ctx, wangle::AcceptPipelineType conn) override;
   void readException(Context* ctx, folly::exception_wrapper e) override;
 
-  // Impl RelayTableManager::Callback
-  void onRelayData(const folly::SocketAddress& address,
-                   const std::unique_ptr<folly::IOBuf>& buf) override;
-
 private:
-  void onUdpPing(Context* ctx, wangle::AcceptPipelineType conn);
-  void onPublicEndpointsRequest(Context* ctx, wangle::AcceptPipelineType conn);
+  void onUdpPing(const folly::SocketAddress& address, const std::string& peer_tag, uint64_t query_id);
+  void onPublicEndpointsRequest(const folly::SocketAddress& address, const std::string& peer_tag);
+  void onRelayDataAvailable(const folly::SocketAddress& address,
+                            const std::string peer_tag,
+                            const std::unique_ptr<folly::IOBuf>& buf);
 
   std::shared_ptr<folly::AsyncUDPSocket> socket_;
-  RelayTableManager relay_table_manager_;
+  // RelayTableManager relay_table_manager_;
+  std::map<std::string, std::shared_ptr<RelayTable>> relay_table_map_;
 };
 
 // chains the handlers together to define the response pipeline

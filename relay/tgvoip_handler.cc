@@ -19,9 +19,14 @@
 
 #include <folly/Singleton.h>
 #include "nebula/base/logger/glog_util.h"
+#include "nebula/base/io_buf_util.h"
 #include "nebula/net/engine/udp_server.h"
 
-#include "relay/relay_table.h"
+#define TLID_DECRYPTED_AUDIO_BLOCK 0xDBF948C1
+#define TLID_SIMPLE_AUDIO_BLOCK 0xCC0D0E76
+#define TLID_UDP_REFLECTOR_PEER_INFO 0x27D9371C
+#define TLID_UDP_REFLECTOR_PEER_INFO_IPV6 0x83fc73b1
+#define TLID_UDP_REFLECTOR_SELF_INFO 0xc01572c7
 
 using namespace nebula;
 
@@ -39,13 +44,18 @@ void ModuleUdpTGVoipInitialize() {
          });
 }
 
-UdpTGVoipPipeline::UdpTGVoipPipeline()
-  : relay_table_manager_(this) {
-  LOG(INFO) << "UdpTGVoipPipeline::UdpTGVoipPipeline()";
-}
+//UdpTGVoipPipeline::UdpTGVoipPipeline()
+//  : relay_table_manager_(this) {
+//  LOG(INFO) << "UdpTGVoipPipeline::UdpTGVoipPipeline()";
+//}
+//
+//UdpTGVoipPipeline::~UdpTGVoipPipeline() {
+//  LOG(INFO) << "UdpTGVoipPipeline::~UdpTGVoipPipeline()";
+//}
+
 
 void UdpTGVoipPipeline::read(Context* ctx, wangle::AcceptPipelineType conn) {
-  LOG(INFO) << "UdpTGVoipPipeline::read()";
+  // LOG(INFO) << "UdpTGVoipPipeline::read()";
   if (conn.type() != typeid(UdpTupleData)) {
     LOG(ERROR) << "";
   }
@@ -68,8 +78,7 @@ void UdpTGVoipPipeline::read(Context* ctx, wangle::AcceptPipelineType conn) {
 
   folly::io::Cursor c(buf);
 
-  std::string peer_tag;
-  c.readFixedString(16);
+  std::string peer_tag = c.readFixedString(16);
 
   uint32_t packet_types[4];
   packet_types[0] = c.readLE<uint32_t>();
@@ -81,15 +90,16 @@ void UdpTGVoipPipeline::read(Context* ctx, wangle::AcceptPipelineType conn) {
     packet_types[1] == 0xFFFFFFFF &&
     packet_types[2] == 0xFFFFFFFF &&
     packet_types[3] == 0xFFFFFFFF) {
-    onPublicEndpointsRequest(ctx, conn);
+    onPublicEndpointsRequest(address, peer_tag);
   } else if (packet_types[0] == uint32_t(-1) &&
     packet_types[1] == uint32_t(-1) &&
     packet_types[2] == uint32_t(-1) &&
     packet_types[3] == uint32_t(-2)) {
-    onUdpPing(ctx, conn);
+
+    onUdpPing(address, peer_tag, c.readLE<uint64_t>());
   } else {
     // TODO(@benqi): length invalid check
-    relay_table_manager_.OnRelayDataAvailable(peer_tag, address, std::unique_ptr<folly::IOBuf>(buf));
+    onRelayDataAvailable(address, peer_tag, std::unique_ptr<folly::IOBuf>(buf));
   }
 
 }
@@ -98,16 +108,73 @@ void UdpTGVoipPipeline::readException(Context* ctx, folly::exception_wrapper e) 
   LOG(INFO) << "UdpTGVoipPipeline::readException()";
 }
 
-void UdpTGVoipPipeline::onUdpPing(Context* ctx, wangle::AcceptPipelineType conn) {
+void UdpTGVoipPipeline::onUdpPing(const folly::SocketAddress& address, const std::string& peer_tag, uint64_t query_id) {
+  LOG(INFO) << "onUdpPing - recv from " << address << ", peer_tag: " << peer_tag << ", query_id: " << query_id;
+
+  auto io_buf2 = folly::IOBuf::create(1024);
+  IOBufWriter iobw(io_buf2.get(), 1024);
+  iobw.push((const uint8_t*)peer_tag.data(), peer_tag.size());
+  iobw.writeLE(uint32_t(-1));
+  iobw.writeLE(uint32_t(-1));
+  iobw.writeLE(uint32_t(-1));
+  iobw.writeLE((uint32_t)TLID_UDP_REFLECTOR_SELF_INFO);
+
+  iobw.writeLE(static_cast<uint32_t>(time(nullptr)));
+  iobw.writeLE(query_id);
+  char ip[16];
+  address.getAddressStr(ip, 16);
+  iobw.push((const uint8_t*)ip, 16);
+  iobw.writeLE((uint32_t)address.getPort());
+
+  // udp ping
+  socket_->write(address, io_buf2);
+
+  // TODO(@benqi): forward to???
 }
 
-void UdpTGVoipPipeline::onPublicEndpointsRequest(Context* ctx, wangle::AcceptPipelineType conn) {
+void UdpTGVoipPipeline::onPublicEndpointsRequest(const folly::SocketAddress& address, const std::string& peer_tag) {
+  LOG(INFO) << "onPublicEndpointsRequest - recv from " << address << ", peer_tag: " << peer_tag;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////
-void UdpTGVoipPipeline::onRelayData(const folly::SocketAddress& address,
-                                    const std::unique_ptr<folly::IOBuf>& buf) {
-  // LOG(INFO) << "UdpTGVoipPipeline::onRelayData()";
+void UdpTGVoipPipeline::onRelayDataAvailable(const folly::SocketAddress& address,
+                                             const std::string peer_tag,
+                                             const std::unique_ptr<folly::IOBuf>& buf) {
+  LOG(INFO) << "onRelayDataAvailable - recv from " << address << ", peer_tag: " << peer_tag << ", len: " << buf->length();
+
+  std::shared_ptr<RelayTable> table;
+
+  auto it = relay_table_map_.find(peer_tag);
+  if (it != relay_table_map_.end()) {
+    table = it->second;
+    bool found = false;
+    for (auto& i : it->second->peers) {
+      if (i.addr == address) {
+        found = true;
+        // table = it->second;
+        break;
+      }
+    }
+    if (!found) {
+      table->peers.push_back(Endpoint{address, 0});
+    }
+    // it->second.peers.push_back(address);
+    // Endpoint&
+  } else {
+    //RelayTable table;
+    table = std::make_shared<RelayTable>();
+    table->peer_tag = peer_tag;
+    table->peers.push_back(Endpoint{address, 0});
+    relay_table_map_.insert(std::make_pair(peer_tag, table));
+  }
+
+  // it = relay_table_map_.find(peer_tag);
+  for (auto i : table->peers) {
+    if (i.addr != address) {
+      LOG(INFO) << "onRelayData - send data to address " << address;
+      // socket_->write(address, buf);
+      socket_->write(i.addr, buf->clone());
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
